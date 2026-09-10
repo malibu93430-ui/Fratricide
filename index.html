@@ -5,86 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fratricide</title>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --primary: #4F46E5;
-      --noah: #2563EB;
-      --noelia: #DB2777;
-      --bg: #F8FAFC;
-      --card-bg: #FFFFFF;
-      --text: #0F172A;
-      --text-muted: #64748B;
-      --border: #E2E8F0;
-      --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Nunito', sans-serif; }
-    h1, h2, h3, h4 { font-family: 'Fredoka', sans-serif; }
-    body { background-color: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 50px; }
-
-    header {
-      background: linear-gradient(135deg, #4338CA, #6366F1);
-      color: white; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;
-    }
-    .header-actions { display: flex; align-items: center; gap: 12px; }
-    .badge-sync { font-size: 0.8rem; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 999px; }
-    .btn-logout {
-      background: white; color: var(--primary); border: none; padding: 6px 14px;
-      border-radius: 8px; font-weight: 700; cursor: pointer;
-    }
-
-    nav {
-      max-width: 900px; margin: 20px auto 0; padding: 0 16px; display: flex; gap: 8px; overflow-x: auto;
-    }
-    .nav-tab {
-      padding: 10px 18px; border: none; border-radius: 10px 10px 0 0;
-      background: #CBD5E1; color: #475569; font-weight: 700; cursor: pointer;
-    }
-    .nav-tab.active { background: var(--card-bg); color: var(--primary); }
-
-    .container { max-width: 900px; margin: 0 auto; padding: 0 16px; }
-    .card { background: var(--card-bg); border-radius: 16px; padding: 24px; box-shadow: var(--shadow); margin-bottom: 20px; }
-
-    /* Connexion */
-    #login-screen {
-      max-width: 400px; margin: 80px auto; background: white; padding: 32px;
-      border-radius: 20px; box-shadow: var(--shadow);
-    }
-    .field { margin-bottom: 16px; }
-    .field label { display: block; font-weight: 700; margin-bottom: 6px; font-size: 0.9rem; }
-    .field input {
-      width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 10px; font-size: 1rem; outline: none;
-    }
-    .field input:focus { border-color: var(--primary); }
-    .btn-submit {
-      width: 100%; padding: 12px; background: var(--primary); color: white;
-      border: none; border-radius: 10px; font-weight: 700; font-size: 1rem; cursor: pointer;
-    }
-
-    /* Duel Dashboard */
-    .duel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-    @media (max-width: 600px) { .duel-grid { grid-template-columns: 1fr; } }
-    .kid-box { padding: 18px; border-radius: 14px; border: 2px solid transparent; }
-    .kid-box.noah { background: #EFF6FF; border-color: #93C5FD; }
-    .kid-box.noelia { background: #FDF2F8; border-color: #F9A8D4; }
-
-    .task-row {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 12px 0; border-bottom: 1px solid var(--border);
-    }
-    .checkbox-btn {
-      width: 32px; height: 32px; border-radius: 8px; border: 2px solid var(--border);
-      background: white; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
-    }
-    .checkbox-btn.checked { background: #10B981; border-color: #10B981; color: white; }
-
-    .bonus-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 14px; }
-    .btn-bonus {
-      background: #F8FAFC; border: 2px solid var(--border); border-radius: 12px;
-      padding: 14px; font-weight: 700; text-align: left; cursor: pointer; transition: 0.2s;
-    }
-    .btn-bonus:hover { border-color: var(--primary); background: #EEF2FF; }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -93,14 +14,14 @@
     <h2 style="margin-bottom: 8px;">⚔️ Fratricide</h2>
     <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Accède à ton suivi de tâches du mois</p>
     <div class="field">
-      <label>Profil</label>
+      <label for="username">Profil</label>
       <input type="text" id="username" placeholder="admin, noah ou noelia">
     </div>
     <div class="field">
-      <label>Mot de passe</label>
+      <label for="password">Mot de passe</label>
       <input type="password" id="password" placeholder="••••••••">
     </div>
-    <button class="btn-submit" onclick="login()">Se connecter</button>
+    <button type="button" class="btn-submit" onclick="login()">Se connecter</button>
   </div>
 
   <!-- Application Principale -->
@@ -110,7 +31,7 @@
       <div class="header-actions">
         <span class="badge-sync" id="sync-indicator">Synchronisé</span>
         <span id="user-tag" style="font-weight: 700;"></span>
-        <button class="btn-logout" onclick="logout()">Quitter</button>
+        <button type="button" class="btn-logout" onclick="logout()">Quitter</button>
       </div>
     </header>
 
@@ -122,7 +43,7 @@
         <div class="duel-grid">
           <div class="kid-box noah">
             <h3>👦 Noah</h3>
-            <p style="margin-top: 8px;">Points quotidiens : <strong id="d-noah-pts">0</strong> pts</p>
+            <p style="margin-top: 8px;">Points quotidiens : <strong id="d-noah-pts">0.0</strong> pts</p>
             <p>Bonus gagnés : <strong id="d-noah-bonus">0.00</strong> €</p>
             <div style="margin-top: 12px; padding: 8px; background: white; border-radius: 8px;">
               Gain final : <strong id="d-noah-final" style="color: var(--noah);">0.00 €</strong>
@@ -130,7 +51,7 @@
           </div>
           <div class="kid-box noelia">
             <h3>👧 Noélia</h3>
-            <p style="margin-top: 8px;">Points quotidiens : <strong id="d-noelia-pts">0</strong> pts</p>
+            <p style="margin-top: 8px;">Points quotidiens : <strong id="d-noelia-pts">0.0</strong> pts</p>
             <p>Bonus gagnés : <strong id="d-noelia-bonus">0.00</strong> €</p>
             <div style="margin-top: 12px; padding: 8px; background: white; border-radius: 8px;">
               Gain final : <strong id="d-noelia-final" style="color: var(--noelia);">0.00 €</strong>
@@ -147,7 +68,7 @@
       <!-- Planning Noah -->
       <section id="tab-noah" style="display: none;">
         <div class="card">
-          <h3>👦 Planning Hebdomadaire - Noah</h3>
+          <h3>👦 Planning Quotidien - Noah</h3>
           <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 14px;">0,5 pt par tâche cochée</p>
           <div id="noah-tasks"></div>
         </div>
@@ -162,12 +83,12 @@
         </div>
       </section>
 
-      <!-- Tâches Bonus communes -->
+      <!-- Tâches Bonus -->
       <section id="tab-bonus" style="display: none;">
         <div class="card">
           <h3>⭐ Enregistrer une Tâche Bonus (1,00 €)</h3>
           <div style="margin: 14px 0;">
-            <label style="font-weight: 700; margin-right: 8px;">Attribué à :</label>
+            <label for="bonus-assign" style="font-weight: 700; margin-right: 8px;">Attribué à :</label>
             <select id="bonus-assign" style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border);">
               <option value="Noah">Noah</option>
               <option value="Noélia">Noélia</option>
@@ -175,278 +96,16 @@
           </div>
 
           <div class="bonus-buttons">
-            <button class="btn-bonus" onclick="submitBonus('Faire une lessive')">🧺 Faire une lessive</button>
-            <button class="btn-bonus" onclick="submitBonus('Balayer les extérieurs')">🧹 Balayer les extérieurs</button>
-            <button class="btn-bonus" onclick="submitBonus('Passer l\'aspirateur')">✨ Passer l'aspirateur</button>
-            <button class="btn-bonus" onclick="submitBonus('Nettoyer la baie vitrée')">🪟 Nettoyer la baie vitrée</button>
+            <button type="button" class="btn-bonus" onclick="submitBonus('Faire une lessive')">🧺 Faire une lessive</button>
+            <button type="button" class="btn-bonus" onclick="submitBonus('Balayer les extérieurs')">🧹 Balayer les extérieurs</button>
+            <button type="button" class="btn-bonus" onclick="submitBonus('Passer l\'aspirateur')">✨ Passer l'aspirateur</button>
+            <button type="button" class="btn-bonus" onclick="submitBonus('Nettoyer la baie vitrée')">🪟 Nettoyer la baie vitrée</button>
           </div>
         </div>
       </section>
     </main>
   </div>
 
-  <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbyspoYpEdIUwX2sLWAdB-ZcZlaf105Ga8b1eI_HSbe7HkKZz0pALOlQyvW9xttdJIUbYw/exec";
-
-    const DAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
-    
-    // Mapping direct sur le classeur Sheets (Noah : L3-L16 | Noélia : L19-L32)
-    const NOAH_TASKS = [
-      { day: 'Lundi', task: 'Mettre la table', row: 3 },
-      { day: 'Lundi', task: 'Vider le lave-vaisselle', row: 4 },
-      { day: 'Mardi', task: 'Mettre la table', row: 5 },
-      { day: 'Mardi', task: 'Vider le lave-vaisselle', row: 6 },
-      { day: 'Mercredi', task: 'Mettre la table', row: 7 },
-      { day: 'Mercredi', task: 'Vider le lave-vaisselle', row: 8 },
-      { day: 'Jeudi', task: 'Mettre la table', row: 9 },
-      { day: 'Jeudi', task: 'Vider le lave-vaisselle', row: 10 },
-      { day: 'Vendredi', task: 'Mettre la table', row: 11 },
-      { day: 'Vendredi', task: 'Vider le lave-vaisselle', row: 12 },
-      { day: 'Samedi', task: 'Mettre la table', row: 13 },
-      { day: 'Samedi', task: 'Vider le lave-vaisselle', row: 14 },
-      { day: 'Dimanche', task: 'Mettre la table', row: 15 },
-      { day: 'Dimanche', task: 'Vider le lave-vaisselle', row: 16 }
-    ];
-
-    const NOELIA_TASKS = [
-      { day: 'Lundi', task: 'Débarrasser la table', row: 19 },
-      { day: 'Lundi', task: 'Remplir le lave-vaisselle', row: 20 },
-      { day: 'Mardi', task: 'Débarrasser la table', row: 21 },
-      { day: 'Mardi', task: 'Remplir le lave-vaisselle', row: 22 },
-      { day: 'Mercredi', task: 'Débarrasser la table', row: 23 },
-      { day: 'Mercredi', task: 'Remplir le lave-vaisselle', row: 24 },
-      { day: 'Jeudi', task: 'Débarrasser la table', row: 25 },
-      { day: 'Jeudi', task: 'Remplir le lave-vaisselle', row: 26 },
-      { day: 'Vendredi', task: 'Débarrasser la table', row: 27 },
-      { day: 'Vendredi', task: 'Remplir le lave-vaisselle', row: 28 },
-      { day: 'Samedi', task: 'Débarrasser la table', row: 29 },
-      { day: 'Samedi', task: 'Remplir le lave-vaisselle', row: 30 },
-      { day: 'Dimanche', task: 'Débarrasser la table', row: 31 },
-      { day: 'Dimanche', task: 'Remplir le lave-vaisselle', row: 32 }
-    ];
-
-    let user = null;
-    let state = {
-      noahDaily: Array(14).fill(0),
-      noeliaDaily: Array(14).fill(0),
-      noahBonus: 0,
-      noeliaBonus: 0
-    };
-
-    function login() {
-      const u = document.getElementById('username').value.trim().toLowerCase();
-      const p = document.getElementById('password').value.trim();
-
-      if (u === 'admin' && p === 'admin123') user = { role: 'admin', name: 'Admin (Parents)' };
-      else if (u === 'noah' && p === 'noah123') user = { role: 'noah', name: 'Noah' };
-      else if (u === 'noelia' && p === 'noelia123') user = { role: 'noelia', name: 'Noélia' };
-      else {
-        alert('Identifiants invalides');
-        return;
-      }
-
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-      document.getElementById('user-tag').innerText = user.name;
-
-      setupTabs();
-      loadDriveData();
-    }
-
-    function logout() {
-      user = null;
-      document.getElementById('login-screen').style.display = 'block';
-      document.getElementById('app').style.display = 'none';
-    }
-
-    function setupTabs() {
-      const nav = document.getElementById('nav-container');
-      nav.innerHTML = '';
-      const tabs = [
-        { id: 'dash', label: '📊 Tableau de bord', access: ['admin', 'noah', 'noelia'] },
-        { id: 'noah', label: '👦 Planning Noah', access: ['admin', 'noah'] },
-        { id: 'noelia', label: '👧 Planning Noélia', access: ['admin', 'noelia'] },
-        { id: 'bonus', label: '⭐ Tâches Bonus (1€)', access: ['admin', 'noah', 'noelia'] }
-      ];
-
-      tabs.forEach((t, i) => {
-        if (t.access.includes(user.role)) {
-          const b = document.createElement('button');
-          b.className = `nav-tab ${i === 0 ? 'active' : ''}`;
-          b.innerText = t.label;
-          b.onclick = () => showTab(t.id, b);
-          nav.appendChild(b);
-        }
-      });
-      showTab('dash', nav.children[0]);
-    }
-
-    function showTab(id, btn) {
-      document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
-      ['dash', 'noah', 'noelia', 'bonus'].forEach(tabId => {
-        const el = document.getElementById(`tab-${tabId}`);
-        if (el) el.style.display = (tabId === id) ? 'block' : 'none';
-      });
-    }
-
-    async function loadDriveData() {
-      document.getElementById('sync-indicator').innerText = 'Chargement Drive...';
-      try {
-        const res = await fetch(API_URL);
-        const json = await res.json();
-        if (json.status === 'success' && json.data) {
-          NOAH_TASKS.forEach((item, idx) => {
-            const val = json.data[item.row - 1][2];
-            state.noahDaily[idx] = (val == 1 || val == "1") ? 1 : 0;
-          });
-
-          NOELIA_TASKS.forEach((item, idx) => {
-            const val = json.data[item.row - 1][2];
-            state.noeliaDaily[idx] = (val == 1 || val == "1") ? 1 : 0;
-          });
-
-          let nBonus = 0;
-          let noelBonus = 0;
-          for (let r = 35; r <= 38; r++) {
-            nBonus += Number(json.data[r][2] || 0) * 1;
-          }
-          for (let r = 39; r <= 42; r++) {
-            noelBonus += Number(json.data[r][2] || 0) * 1;
-          }
-          state.noahBonus = nBonus;
-          state.noeliaBonus = noelBonus;
-
-          document.getElementById('sync-indicator').innerText = '🟢 Connecté Drive';
-          render();
-        }
-      } catch (e) {
-        document.getElementById('sync-indicator').innerText = 'Échec de synchronisation';
-        render();
-      }
-    }
-
-    async function toggleTask(child, idx) {
-      const taskList = child === 'noah' ? NOAH_TASKS : NOELIA_TASKS;
-      const list = child === 'noah' ? state.noahDaily : state.noeliaDaily;
-      
-      const nextVal = list[idx] === 1 ? 0 : 1;
-      list[idx] = nextVal;
-      render();
-
-      document.getElementById('sync-indicator').innerText = 'Enregistrement...';
-      try {
-        await fetch(API_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'updateTask',
-            row: taskList[idx].row,
-            col: 3,
-            value: nextVal
-          })
-        });
-        document.getElementById('sync-indicator').innerText = '🟢 Connecté Drive';
-      } catch (err) {
-        document.getElementById('sync-indicator').innerText = 'Erreur enregistrement';
-      }
-    }
-
-    async function submitBonus(taskName) {
-      const kid = document.getElementById('bonus-assign').value;
-      if (user.role === 'noah' && kid !== 'Noah') return alert('Tu peux uniquement ajouter tes bonus.');
-      if (user.role === 'noelia' && kid !== 'Noélia') return alert('Tu peux uniquement ajouter tes bonus.');
-
-      if (kid === 'Noah') state.noahBonus += 1;
-      else state.noeliaBonus += 1;
-
-      render();
-
-      document.getElementById('sync-indicator').innerText = 'Enregistrement...';
-      try {
-        await fetch(API_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'addBonus',
-            child: kid,
-            task: taskName,
-            reward: 1
-          })
-        });
-        document.getElementById('sync-indicator').innerText = '🟢 Connecté Drive';
-      } catch (err) {
-        document.getElementById('sync-indicator').innerText = 'Erreur enregistrement';
-      }
-    }
-
-    function render() {
-      // Planning Noah
-      const noahDiv = document.getElementById('noah-tasks');
-      noahDiv.innerHTML = NOAH_TASKS.map((t, idx) => `
-        <div class="task-row">
-          <div>
-            <strong>${t.day}</strong> : ${t.task}
-          </div>
-          <button class="checkbox-btn ${state.noahDaily[idx] ? 'checked' : ''}" onclick="toggleTask('noah', ${idx})">
-            ${state.noahDaily[idx] ? '✓' : ''}
-          </button>
-        </div>
-      `).join('');
-
-      // Planning Noélia
-      const noeliaDiv = document.getElementById('noelia-tasks');
-      noeliaDiv.innerHTML = NOELIA_TASKS.map((t, idx) => `
-        <div class="task-row">
-          <div>
-            <strong>${t.day}</strong> : ${t.task}
-          </div>
-          <button class="checkbox-btn ${state.noeliaDaily[idx] ? 'checked' : ''}" onclick="toggleTask('noelia', ${idx})">
-            ${state.noeliaDaily[idx] ? '✓' : ''}
-          </button>
-        </div>
-      `).join('');
-
-      // Calcul des points quotidiens
-      const noahPts = state.noahDaily.filter(v => v === 1).length * 0.5;
-      const noeliaPts = state.noeliaDaily.filter(v => v === 1).length * 0.5;
-
-      const maxPossiblePts = 14 * 0.5;
-      const noahPct = maxPossiblePts > 0 ? (noahPts / maxPossiblePts) : 0;
-      const noeliaPct = maxPossiblePts > 0 ? (noeliaPts / maxPossiblePts) : 0;
-
-      // Péréquation sur les bonus
-      const diff = Math.abs(noahPct - noeliaPct);
-      let noahFinal = state.noahBonus;
-      let noeliaFinal = state.noeliaBonus;
-      let explanation = "";
-
-      if (noahPct > noeliaPct) {
-        const transfer = state.noeliaBonus * diff;
-        noahFinal += transfer;
-        noeliaFinal = Math.max(0, noeliaFinal - transfer);
-        explanation = `Noah a réalisé ${(diff * 100).toFixed(1)}% de tâches en plus. Il prend ${transfer.toFixed(2)} € sur la cagnotte de Noélia.`;
-      } else if (noeliaPct > noahPct) {
-        const transfer = state.noahBonus * diff;
-        noeliaFinal += transfer;
-        noahFinal = Math.max(0, noahFinal - transfer);
-        explanation = `Noélia a réalisé ${(diff * 100).toFixed(1)}% de tâches en plus. Elle prend ${transfer.toFixed(2)} € sur la cagnotte de Noah.`;
-      } else {
-        explanation = "Égalité parfaite : chacun conserve l'intégralité de ses récompenses.";
-      }
-
-      document.getElementById('d-noah-pts').innerText = noahPts.toFixed(1);
-      document.getElementById('d-noah-bonus').innerText = state.noahBonus.toFixed(2);
-      document.getElementById('d-noah-final').innerText = noahFinal.toFixed(2) + ' €';
-
-      document.getElementById('d-noelia-pts').innerText = noeliaPts.toFixed(1);
-      document.getElementById('d-noelia-bonus').innerText = state.noeliaBonus.toFixed(2);
-      document.getElementById('d-noelia-final').innerText = noeliaFinal.toFixed(2) + ' €';
-
-      document.getElementById('diff-text').innerText = explanation;
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
