@@ -42,20 +42,22 @@ let state = {
   noeliaBonus: 0
 };
 
-// Récupération de la session et du cache au démarrage
-window.addEventListener('DOMContentLoaded', () => {
-  const cachedUser = localStorage.getItem('fratricide_session');
-  const cachedState = localStorage.getItem('fratricide_state');
+// Vérification immédiate de la session (localStorage + sessionStorage)
+function restoreSession() {
+  const savedUser = localStorage.getItem('fratricide_session') || sessionStorage.getItem('fratricide_session');
+  const savedState = localStorage.getItem('fratricide_state') || sessionStorage.getItem('fratricide_state');
 
-  if (cachedState) {
-    try { state = JSON.parse(cachedState); } catch(e) {}
+  if (savedState) {
+    try { state = JSON.parse(savedState); } catch (e) {}
   }
 
-  if (cachedUser) {
-    user = JSON.parse(cachedUser);
-    launchApp();
+  if (savedUser) {
+    try {
+      user = JSON.parse(savedUser);
+      launchApp();
+    } catch (e) {}
   }
-});
+}
 
 function login() {
   const u = document.getElementById('username').value.trim().toLowerCase();
@@ -69,14 +71,27 @@ function login() {
     return;
   }
 
-  localStorage.setItem('fratricide_session', JSON.stringify(user));
+  const serializedUser = JSON.stringify(user);
+  localStorage.setItem('fratricide_session', serializedUser);
+  sessionStorage.setItem('fratricide_session', serializedUser);
+
   launchApp();
 }
 
 function launchApp() {
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
+  const loginEl = document.getElementById('login-screen');
+  const appEl = document.getElementById('app');
+  if (loginEl) loginEl.style.display = 'none';
+  if (appEl) appEl.style.display = 'block';
+
   document.getElementById('user-tag').innerText = user.name;
+
+  // Pré-sélectionner automatiquement le nom dans l'onglet bonus
+  const bonusSelect = document.getElementById('bonus-assign');
+  if (bonusSelect) {
+    if (user.role === 'noah') bonusSelect.value = 'Noah';
+    if (user.role === 'noelia') bonusSelect.value = 'Noélia';
+  }
 
   setupTabs();
   render();
@@ -86,6 +101,7 @@ function launchApp() {
 function logout() {
   user = null;
   localStorage.removeItem('fratricide_session');
+  sessionStorage.removeItem('fratricide_session');
   document.getElementById('login-screen').style.display = 'block';
   document.getElementById('app').style.display = 'none';
 }
@@ -122,7 +138,9 @@ function showTab(id, btn) {
 }
 
 function saveLocalState() {
-  localStorage.setItem('fratricide_state', JSON.stringify(state));
+  const str = JSON.stringify(state);
+  localStorage.setItem('fratricide_state', str);
+  sessionStorage.setItem('fratricide_state', str);
 }
 
 async function loadDriveData() {
@@ -134,6 +152,7 @@ async function loadDriveData() {
     const json = await res.json();
 
     if (json.status === 'success' && json.data) {
+      // Tâches quotidiennes
       NOAH_TASKS.forEach((item, idx) => {
         const val = json.data[item.row - 1] ? json.data[item.row - 1][2] : 0;
         state.noahDaily[idx] = (val == 1 || val == "1") ? 1 : 0;
@@ -144,14 +163,21 @@ async function loadDriveData() {
         state.noeliaDaily[idx] = (val == 1 || val == "1") ? 1 : 0;
       });
 
+      // Lecture des tâches bonus (L36 à L43)
       let nBonus = 0;
       let noelBonus = 0;
-      for (let r = 35; r <= 38; r++) {
-        if (json.data[r]) nBonus += Number(json.data[r][2] || 0) * 1;
+
+      for (let r = 35; r < Math.min(json.data.length, 45); r++) {
+        const rowKid = String(json.data[r][0] || "").trim().toLowerCase();
+        const count = Number(json.data[r][2]) || 0;
+
+        if (rowKid === 'noah') {
+          nBonus += count;
+        } else if (rowKid.includes('noel')) {
+          noelBonus += count;
+        }
       }
-      for (let r = 39; r <= 42; r++) {
-        if (json.data[r]) noelBonus += Number(json.data[r][2] || 0) * 1;
-      }
+
       state.noahBonus = nBonus;
       state.noeliaBonus = noelBonus;
 
@@ -160,7 +186,7 @@ async function loadDriveData() {
       render();
     }
   } catch (e) {
-    badge.innerText = '🟡 Mode Local (Hors-ligne)';
+    badge.innerText = '🟡 Mode Local';
     render();
   }
 }
@@ -187,9 +213,11 @@ async function toggleTask(child, idx) {
 }
 
 async function submitBonus(taskName) {
-  const kid = document.getElementById('bonus-assign').value;
-  if (user.role === 'noah' && kid !== 'Noah') return alert('Tu peux uniquement ajouter tes bonus.');
-  if (user.role === 'noelia' && kid !== 'Noélia') return alert('Tu peux uniquement ajouter tes bonus.');
+  let kid = document.getElementById('bonus-assign').value;
+
+  // Contrôle des droits
+  if (user.role === 'noah') kid = 'Noah';
+  if (user.role === 'noelia') kid = 'Noélia';
 
   if (kid === 'Noah') state.noahBonus += 1;
   else state.noeliaBonus += 1;
@@ -270,3 +298,6 @@ function render() {
 
   document.getElementById('diff-text').innerText = explanation;
 }
+
+// Lancement automatique au chargement
+restoreSession();
