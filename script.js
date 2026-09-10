@@ -1,6 +1,6 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbyspoYpEdIUwX2sLWAdB-ZcZlaf105Ga8b1eI_HSbe7HkKZz0pALOlQyvW9xttdJIUbYw/exec";
 
-// Lignes exactes dans le classeur Sheets
+// Positions des cases quotidiennes dans le tableur Google Sheets
 const NOAH_TASKS = [
   { day: 'Lundi', task: 'Mettre la table', row: 3 },
   { day: 'Lundi', task: 'Vider le lave-vaisselle', row: 4 },
@@ -19,20 +19,20 @@ const NOAH_TASKS = [
 ];
 
 const NOELIA_TASKS = [
-  { day: 'Lundi', task: 'Débarrasser la table', row: 19 },
-  { day: 'Lundi', task: 'Remplir le lave-vaisselle', row: 20 },
-  { day: 'Mardi', task: 'Débarrasser la table', row: 21 },
-  { day: 'Mardi', task: 'Remplir le lave-vaisselle', row: 22 },
-  { day: 'Mercredi', task: 'Débarrasser la table', row: 23 },
-  { day: 'Mercredi', task: 'Remplir le lave-vaisselle', row: 24 },
-  { day: 'Jeudi', task: 'Débarrasser la table', row: 25 },
-  { day: 'Jeudi', task: 'Remplir le lave-vaisselle', row: 26 },
-  { day: 'Vendredi', task: 'Débarrasser la table', row: 27 },
-  { day: 'Vendredi', task: 'Remplir le lave-vaisselle', row: 28 },
-  { day: 'Samedi', task: 'Débarrasser la table', row: 29 },
-  { day: 'Samedi', task: 'Remplir le lave-vaisselle', row: 30 },
-  { day: 'Dimanche', task: 'Débarrasser la table', row: 31 },
-  { day: 'Dimanche', task: 'Remplir le lave-vaisselle', row: 32 }
+  { day: 'Lundi', task: 'Débarrasser la table', row: 21 },
+  { day: 'Lundi', task: 'Remplir le lave-vaisselle', row: 22 },
+  { day: 'Mardi', task: 'Débarrasser la table', row: 23 },
+  { day: 'Mardi', task: 'Remplir le lave-vaisselle', row: 24 },
+  { day: 'Mercredi', task: 'Débarrasser la table', row: 25 },
+  { day: 'Mercredi', task: 'Remplir le lave-vaisselle', row: 26 },
+  { day: 'Jeudi', task: 'Débarrasser la table', row: 27 },
+  { day: 'Jeudi', task: 'Remplir le lave-vaisselle', row: 28 },
+  { day: 'Vendredi', task: 'Débarrasser la table', row: 29 },
+  { day: 'Vendredi', task: 'Remplir le lave-vaisselle', row: 30 },
+  { day: 'Samedi', task: 'Débarrasser la table', row: 31 },
+  { day: 'Samedi', task: 'Remplir le lave-vaisselle', row: 32 },
+  { day: 'Dimanche', task: 'Débarrasser la table', row: 33 },
+  { day: 'Dimanche', task: 'Remplir le lave-vaisselle', row: 34 }
 ];
 
 let user = null;
@@ -43,11 +43,10 @@ let state = {
   noeliaBonus: 0
 };
 
-// Chargement initial et restauration de session
 document.addEventListener('DOMContentLoaded', () => {
   const savedState = localStorage.getItem('fratricide_state');
   if (savedState) {
-    try { state = JSON.parse(savedState); } catch (e) {}
+    try { state = JSON.parse(savedState); } catch(e) {}
   }
 
   const savedUser = localStorage.getItem('fratricide_session');
@@ -55,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       user = JSON.parse(savedUser);
       displayApp();
-    } catch (e) {}
+    } catch(e) {}
   }
 });
 
@@ -159,27 +158,36 @@ async function loadDriveData() {
     const json = await res.json();
 
     if (json && json.status === 'success' && Array.isArray(json.data)) {
-      // Tâches quotidiennes Noah
+      // 1. Quotidien Noah
       NOAH_TASKS.forEach((item, idx) => {
-        const val = json.data[item.row - 1] ? json.data[item.row - 1][2] : 0;
+        const rowData = json.data[item.row - 1];
+        const val = rowData ? rowData[2] : 0;
         state.noahDaily[idx] = (val == 1 || val === "1") ? 1 : 0;
       });
 
-      // Tâches quotidiennes Noélia
+      // 2. Quotidien Noélia
       NOELIA_TASKS.forEach((item, idx) => {
-        const val = json.data[item.row - 1] ? json.data[item.row - 1][2] : 0;
+        const rowData = json.data[item.row - 1];
+        const val = rowData ? rowData[2] : 0;
         state.noeliaDaily[idx] = (val == 1 || val === "1") ? 1 : 0;
       });
 
-      // Lecture bonus : Lignes 36 à 39 (Noah), Lignes 40 à 43 (Noélia)
+      // 3. Calcul dynamique des bonus selon le nom présent en Colonne A
       let nBonus = 0;
       let noelBonus = 0;
 
-      for (let r = 35; r <= 38; r++) {
-        if (json.data[r]) nBonus += Number(json.data[r][2]) || 0;
-      }
-      for (let r = 39; r <= 42; r++) {
-        if (json.data[r]) noelBonus += Number(json.data[r][2]) || 0;
+      for (let r = 0; r < json.data.length; r++) {
+        const row = json.data[r];
+        if (!row) continue;
+
+        const name = String(row[0] || "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const count = Number(row[2]) || 0;
+
+        if (name === 'noah') {
+          nBonus += count;
+        } else if (name === 'noelia') {
+          noelBonus += count;
+        }
       }
 
       state.noahBonus = nBonus;
@@ -265,7 +273,6 @@ function render() {
     `).join('');
   }
 
-  // Calculs quotidiens et assiduité
   const noahPts = state.noahDaily.filter(v => v === 1).length * 0.5;
   const noeliaPts = state.noeliaDaily.filter(v => v === 1).length * 0.5;
 
