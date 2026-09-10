@@ -42,26 +42,29 @@ let state = {
   noeliaBonus: 0
 };
 
-// Vérification immédiate de la session (localStorage + sessionStorage)
-function restoreSession() {
-  const savedUser = localStorage.getItem('fratricide_session') || sessionStorage.getItem('fratricide_session');
+// Initialisation sécurisée une fois le DOM chargé
+document.addEventListener('DOMContentLoaded', () => {
   const savedState = localStorage.getItem('fratricide_state') || sessionStorage.getItem('fratricide_state');
-
   if (savedState) {
-    try { state = JSON.parse(savedState); } catch (e) {}
+    try { state = JSON.parse(savedState); } catch (e) { console.error(e); }
   }
 
+  const savedUser = localStorage.getItem('fratricide_session') || sessionStorage.getItem('fratricide_session');
   if (savedUser) {
     try {
       user = JSON.parse(savedUser);
       launchApp();
-    } catch (e) {}
+    } catch (e) { console.error(e); }
   }
-}
+});
 
 function login() {
-  const u = document.getElementById('username').value.trim().toLowerCase();
-  const p = document.getElementById('password').value.trim();
+  const uInput = document.getElementById('username');
+  const pInput = document.getElementById('password');
+  if (!uInput || !pInput) return;
+
+  const u = uInput.value.trim().toLowerCase();
+  const p = pInput.value.trim();
 
   if (u === 'admin' && p === 'admin123') user = { role: 'admin', name: 'Admin (Parents)' };
   else if (u === 'noah' && p === 'noah123') user = { role: 'noah', name: 'Noah' };
@@ -71,9 +74,9 @@ function login() {
     return;
   }
 
-  const serializedUser = JSON.stringify(user);
-  localStorage.setItem('fratricide_session', serializedUser);
-  sessionStorage.setItem('fratricide_session', serializedUser);
+  const serialized = JSON.stringify(user);
+  localStorage.setItem('fratricide_session', serialized);
+  sessionStorage.setItem('fratricide_session', serialized);
 
   launchApp();
 }
@@ -81,14 +84,14 @@ function login() {
 function launchApp() {
   const loginEl = document.getElementById('login-screen');
   const appEl = document.getElementById('app');
+  const userTag = document.getElementById('user-tag');
+
   if (loginEl) loginEl.style.display = 'none';
   if (appEl) appEl.style.display = 'block';
+  if (userTag && user) userTag.innerText = user.name;
 
-  document.getElementById('user-tag').innerText = user.name;
-
-  // Pré-sélectionner automatiquement le nom dans l'onglet bonus
   const bonusSelect = document.getElementById('bonus-assign');
-  if (bonusSelect) {
+  if (bonusSelect && user) {
     if (user.role === 'noah') bonusSelect.value = 'Noah';
     if (user.role === 'noelia') bonusSelect.value = 'Noélia';
   }
@@ -102,13 +105,17 @@ function logout() {
   user = null;
   localStorage.removeItem('fratricide_session');
   sessionStorage.removeItem('fratricide_session');
-  document.getElementById('login-screen').style.display = 'block';
-  document.getElementById('app').style.display = 'none';
+  const loginEl = document.getElementById('login-screen');
+  const appEl = document.getElementById('app');
+  if (loginEl) loginEl.style.display = 'block';
+  if (appEl) appEl.style.display = 'none';
 }
 
 function setupTabs() {
   const nav = document.getElementById('nav-container');
+  if (!nav || !user) return;
   nav.innerHTML = '';
+
   const tabs = [
     { id: 'dash', label: '📊 Tableau de bord', access: ['admin', 'noah', 'noelia'] },
     { id: 'noah', label: '👦 Planning Noah', access: ['admin', 'noah'] },
@@ -125,12 +132,16 @@ function setupTabs() {
       nav.appendChild(b);
     }
   });
-  showTab('dash', nav.children[0]);
+
+  if (nav.children.length > 0) {
+    showTab('dash', nav.children[0]);
+  }
 }
 
 function showTab(id, btn) {
   document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
+
   ['dash', 'noah', 'noelia', 'bonus'].forEach(tabId => {
     const el = document.getElementById(`tab-${tabId}`);
     if (el) el.style.display = (tabId === id) ? 'block' : 'none';
@@ -145,29 +156,30 @@ function saveLocalState() {
 
 async function loadDriveData() {
   const badge = document.getElementById('sync-indicator');
-  badge.innerText = 'Chargement Drive...';
+  if (badge) badge.innerText = 'Chargement Drive...';
 
   try {
     const res = await fetch(API_URL);
     const json = await res.json();
 
-    if (json.status === 'success' && json.data) {
-      // Tâches quotidiennes
+    if (json && json.status === 'success' && Array.isArray(json.data)) {
       NOAH_TASKS.forEach((item, idx) => {
-        const val = json.data[item.row - 1] ? json.data[item.row - 1][2] : 0;
+        const rowData = json.data[item.row - 1];
+        const val = rowData ? rowData[2] : 0;
         state.noahDaily[idx] = (val == 1 || val == "1") ? 1 : 0;
       });
 
       NOELIA_TASKS.forEach((item, idx) => {
-        const val = json.data[item.row - 1] ? json.data[item.row - 1][2] : 0;
+        const rowData = json.data[item.row - 1];
+        const val = rowData ? rowData[2] : 0;
         state.noeliaDaily[idx] = (val == 1 || val == "1") ? 1 : 0;
       });
 
-      // Lecture des tâches bonus (L36 à L43)
       let nBonus = 0;
       let noelBonus = 0;
 
       for (let r = 35; r < Math.min(json.data.length, 45); r++) {
+        if (!json.data[r]) continue;
         const rowKid = String(json.data[r][0] || "").trim().toLowerCase();
         const count = Number(json.data[r][2]) || 0;
 
@@ -182,11 +194,12 @@ async function loadDriveData() {
       state.noeliaBonus = noelBonus;
 
       saveLocalState();
-      badge.innerText = '🟢 Connecté Drive';
+      if (badge) badge.innerText = '🟢 Connecté Drive';
       render();
     }
   } catch (e) {
-    badge.innerText = '🟡 Mode Local';
+    console.warn("Synchronisation Drive indisponible, bascule en local :", e);
+    if (badge) badge.innerText = '🟡 Mode Local';
     render();
   }
 }
@@ -195,29 +208,28 @@ async function toggleTask(child, idx) {
   const taskList = child === 'noah' ? NOAH_TASKS : NOELIA_TASKS;
   const list = child === 'noah' ? state.noahDaily : state.noeliaDaily;
 
-  const nextVal = list[idx] === 1 ? 0 : 1;
-  list[idx] = nextVal;
+  list[idx] = list[idx] === 1 ? 0 : 1;
   saveLocalState();
   render();
 
   const badge = document.getElementById('sync-indicator');
-  badge.innerText = 'Enregistrement...';
+  if (badge) badge.innerText = 'Enregistrement...';
 
   try {
-    const url = `${API_URL}?action=updateTask&row=${taskList[idx].row}&col=3&value=${nextVal}`;
-    await fetch(url);
-    badge.innerText = '🟢 Connecté Drive';
+    const url = `${API_URL}?action=updateTask&row=${taskList[idx].row}&col=3&value=${list[idx]}`;
+    await fetch(url, { mode: 'no-cors' });
+    if (badge) badge.innerText = '🟢 Connecté Drive';
   } catch (err) {
-    badge.innerText = '🟡 Non synchronisé';
+    if (badge) badge.innerText = '🟡 Non synchronisé';
   }
 }
 
 async function submitBonus(taskName) {
-  let kid = document.getElementById('bonus-assign').value;
+  const selectEl = document.getElementById('bonus-assign');
+  let kid = selectEl ? selectEl.value : 'Noah';
 
-  // Contrôle des droits
-  if (user.role === 'noah') kid = 'Noah';
-  if (user.role === 'noelia') kid = 'Noélia';
+  if (user && user.role === 'noah') kid = 'Noah';
+  if (user && user.role === 'noelia') kid = 'Noélia';
 
   if (kid === 'Noah') state.noahBonus += 1;
   else state.noeliaBonus += 1;
@@ -226,14 +238,14 @@ async function submitBonus(taskName) {
   render();
 
   const badge = document.getElementById('sync-indicator');
-  badge.innerText = 'Enregistrement...';
+  if (badge) badge.innerText = 'Enregistrement...';
 
   try {
     const url = `${API_URL}?action=addBonus&child=${encodeURIComponent(kid)}&task=${encodeURIComponent(taskName)}`;
-    await fetch(url);
-    badge.innerText = '🟢 Connecté Drive';
+    await fetch(url, { mode: 'no-cors' });
+    if (badge) badge.innerText = '🟢 Connecté Drive';
   } catch (err) {
-    badge.innerText = '🟡 Non synchronisé';
+    if (badge) badge.innerText = '🟡 Non synchronisé';
   }
 }
 
@@ -288,16 +300,21 @@ function render() {
     explanation = "Égalité : chacun conserve l'intégralité de ses récompenses.";
   }
 
-  document.getElementById('d-noah-pts').innerText = noahPts.toFixed(1);
-  document.getElementById('d-noah-bonus').innerText = state.noahBonus.toFixed(2);
-  document.getElementById('d-noah-final').innerText = noahFinal.toFixed(2) + ' €';
+  const elNoahPts = document.getElementById('d-noah-pts');
+  const elNoahBonus = document.getElementById('d-noah-bonus');
+  const elNoahFinal = document.getElementById('d-noah-final');
+  const elNoeliaPts = document.getElementById('d-noelia-pts');
+  const elNoeliaBonus = document.getElementById('d-noelia-bonus');
+  const elNoeliaFinal = document.getElementById('d-noelia-final');
+  const elDiffText = document.getElementById('diff-text');
 
-  document.getElementById('d-noelia-pts').innerText = noeliaPts.toFixed(1);
-  document.getElementById('d-noelia-bonus').innerText = state.noeliaBonus.toFixed(2);
-  document.getElementById('d-noelia-final').innerText = noeliaFinal.toFixed(2) + ' €';
+  if (elNoahPts) elNoahPts.innerText = noahPts.toFixed(1);
+  if (elNoahBonus) elNoahBonus.innerText = state.noahBonus.toFixed(2);
+  if (elNoahFinal) elNoahFinal.innerText = noahFinal.toFixed(2) + ' €';
 
-  document.getElementById('diff-text').innerText = explanation;
+  if (elNoeliaPts) elNoeliaPts.innerText = noeliaPts.toFixed(1);
+  if (elNoeliaBonus) elNoeliaBonus.innerText = state.noeliaBonus.toFixed(2);
+  if (elNoeliaFinal) elNoeliaFinal.innerText = noeliaFinal.toFixed(2) + ' €';
+
+  if (elDiffText) elDiffText.innerText = explanation;
 }
-
-// Lancement automatique au chargement
-restoreSession();
