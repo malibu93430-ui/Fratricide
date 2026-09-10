@@ -1,6 +1,11 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbyspoYpEdIUwX2sLWAdB-ZcZlaf105Ga8b1eI_HSbe7HkKZz0pALOlQyvW9xttdJIUbYw/exec";
 
-// Positions des cases quotidiennes dans le tableur Google Sheets
+// Avatars en PNG
+const AVATARS = {
+  Noah: "noah.png",
+  Noélia: "noelia.png"
+};
+
 const NOAH_TASKS = [
   { day: 'Lundi', task: 'Mettre la table', row: 3 },
   { day: 'Lundi', task: 'Vider le lave-vaisselle', row: 4 },
@@ -66,7 +71,7 @@ function login() {
   const u = uEl.value.trim().toLowerCase();
   const p = pEl.value.trim();
 
-  if (u === 'admin' && p === 'admin123') user = { role: 'admin', name: 'Admin (Parents)' };
+  if (u === 'admin' && p === 'admin123') user = { role: 'admin', name: 'Papa & Maman' };
   else if (u === 'noah' && p === 'noah123') user = { role: 'noah', name: 'Noah' };
   else if (u === 'noelia' && p === 'noelia123') user = { role: 'noelia', name: 'Noélia' };
   else {
@@ -93,6 +98,12 @@ function displayApp() {
     if (user.role === 'noelia') selectEl.value = 'Noélia';
   }
 
+  // Affiche le bouton reset seulement pour l'admin
+  const resetCard = document.getElementById('admin-reset-card');
+  if (resetCard) {
+    resetCard.style.display = (user && user.role === 'admin') ? 'block' : 'none';
+  }
+
   setupTabs();
   render();
   loadDriveData();
@@ -103,7 +114,7 @@ function logout() {
   localStorage.removeItem('fratricide_session');
   const loginView = document.getElementById('login-screen');
   const appView = document.getElementById('app');
-  if (loginView) loginView.style.display = 'block';
+  if (loginView) loginView.style.display = 'flex';
   if (appView) appView.style.display = 'none';
 }
 
@@ -113,10 +124,10 @@ function setupTabs() {
   nav.innerHTML = '';
 
   const tabs = [
-    { id: 'dash', label: '📊 Tableau de bord', roles: ['admin', 'noah', 'noelia'] },
-    { id: 'noah', label: '👦 Planning Noah', roles: ['admin', 'noah'] },
-    { id: 'noelia', label: '👧 Planning Noélia', roles: ['admin', 'noelia'] },
-    { id: 'bonus', label: '⭐ Tâches Bonus (1€)', roles: ['admin', 'noah', 'noelia'] }
+    { id: 'dash', label: '📊 Duel', roles: ['admin', 'noah', 'noelia'] },
+    { id: 'noah', label: '👦 Noah', roles: ['admin', 'noah'] },
+    { id: 'noelia', label: '👧 Noélia', roles: ['admin', 'noelia'] },
+    { id: 'bonus', label: '⭐ Bonus', roles: ['admin', 'noah', 'noelia'] }
   ];
 
   tabs.forEach((t, i) => {
@@ -151,54 +162,47 @@ function persistState() {
 
 async function loadDriveData() {
   const sync = document.getElementById('sync-indicator');
-  if (sync) sync.innerText = 'Chargement Drive...';
+  if (sync) sync.innerText = 'Synchronisation...';
 
   try {
     const res = await fetch(API_URL);
     const json = await res.json();
 
     if (json && json.status === 'success' && Array.isArray(json.data)) {
-      // 1. Quotidien Noah
       NOAH_TASKS.forEach((item, idx) => {
         const rowData = json.data[item.row - 1];
         const val = rowData ? rowData[2] : 0;
         state.noahDaily[idx] = (val == 1 || val === "1") ? 1 : 0;
       });
 
-      // 2. Quotidien Noélia
       NOELIA_TASKS.forEach((item, idx) => {
         const rowData = json.data[item.row - 1];
         const val = rowData ? rowData[2] : 0;
         state.noeliaDaily[idx] = (val == 1 || val === "1") ? 1 : 0;
       });
 
-      // 3. Calcul dynamique des bonus selon le nom présent en Colonne A
       let nBonus = 0;
       let noelBonus = 0;
 
       for (let r = 0; r < json.data.length; r++) {
         const row = json.data[r];
         if (!row) continue;
-
         const name = String(row[0] || "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const count = Number(row[2]) || 0;
 
-        if (name === 'noah') {
-          nBonus += count;
-        } else if (name === 'noelia') {
-          noelBonus += count;
-        }
+        if (name === 'noah') nBonus += count;
+        else if (name === 'noelia') noelBonus += count;
       }
 
       state.noahBonus = nBonus;
       state.noeliaBonus = noelBonus;
 
       persistState();
-      if (sync) sync.innerText = '🟢 Connecté Drive';
+      if (sync) sync.innerText = '🟢 Drive OK';
       render();
     }
   } catch (e) {
-    if (sync) sync.innerText = '🟡 Mode Local';
+    if (sync) sync.innerText = '🟡 Local';
     render();
   }
 }
@@ -217,7 +221,7 @@ async function toggleTask(child, idx) {
   try {
     const url = `${API_URL}?action=updateTask&row=${taskList[idx].row}&col=3&value=${list[idx]}`;
     await fetch(url, { mode: 'no-cors' });
-    if (sync) sync.innerText = '🟢 Connecté Drive';
+    if (sync) sync.innerText = '🟢 Drive OK';
   } catch (e) {
     if (sync) sync.innerText = '🟡 Non synchronisé';
   }
@@ -242,7 +246,30 @@ async function submitBonus(taskName) {
   try {
     const url = `${API_URL}?action=addBonus&child=${encodeURIComponent(kid)}&task=${encodeURIComponent(taskName)}`;
     await fetch(url, { mode: 'no-cors' });
-    if (sync) sync.innerText = '🟢 Connecté Drive';
+    if (sync) sync.innerText = '🟢 Drive OK';
+  } catch (e) {
+    if (sync) sync.innerText = '🟡 Non synchronisé';
+  }
+}
+
+async function resetAllCounters() {
+  if (!confirm("⚠️ Réinitialiser tous les scores de Noah et Noélia à 0 ?")) return;
+
+  state.noahDaily = Array(14).fill(0);
+  state.noeliaDaily = Array(14).fill(0);
+  state.noahBonus = 0;
+  state.noeliaBonus = 0;
+  persistState();
+  render();
+
+  const sync = document.getElementById('sync-indicator');
+  if (sync) sync.innerText = 'Reset en cours...';
+
+  try {
+    const url = `${API_URL}?action=resetAll`;
+    await fetch(url, { mode: 'no-cors' });
+    if (sync) sync.innerText = '🟢 Drive OK';
+    alert("Tous les compteurs sont revenus à zéro !");
   } catch (e) {
     if (sync) sync.innerText = '🟡 Non synchronisé';
   }
@@ -253,7 +280,10 @@ function render() {
   if (noahDiv) {
     noahDiv.innerHTML = NOAH_TASKS.map((t, idx) => `
       <div class="task-row">
-        <div><strong>${t.day}</strong> : ${t.task}</div>
+        <div class="task-info">
+          <strong>${t.day}</strong>
+          <span>${t.task}</span>
+        </div>
         <button type="button" class="checkbox-btn ${state.noahDaily[idx] ? 'checked' : ''}" onclick="toggleTask('noah', ${idx})">
           ${state.noahDaily[idx] ? '✓' : ''}
         </button>
@@ -265,7 +295,10 @@ function render() {
   if (noeliaDiv) {
     noeliaDiv.innerHTML = NOELIA_TASKS.map((t, idx) => `
       <div class="task-row">
-        <div><strong>${t.day}</strong> : ${t.task}</div>
+        <div class="task-info">
+          <strong>${t.day}</strong>
+          <span>${t.task}</span>
+        </div>
         <button type="button" class="checkbox-btn ${state.noeliaDaily[idx] ? 'checked' : ''}" onclick="toggleTask('noelia', ${idx})">
           ${state.noeliaDaily[idx] ? '✓' : ''}
         </button>
@@ -289,14 +322,33 @@ function render() {
     const transfer = state.noeliaBonus * diff;
     noahFinal += transfer;
     noeliaFinal = Math.max(0, noeliaFinal - transfer);
-    explanation = `Noah a réalisé ${(diff * 100).toFixed(1)}% de tâches en plus. Il prend ${transfer.toFixed(2)} € sur la cagnotte de Noélia.`;
+    explanation = `Noah a ${(diff * 100).toFixed(1)}% d'assiduité en plus. Il prend ${transfer.toFixed(2)} € sur la cagnotte de Noélia.`;
   } else if (noeliaPct > noahPct) {
     const transfer = state.noahBonus * diff;
     noahFinal += transfer;
     noahFinal = Math.max(0, noahFinal - transfer);
-    explanation = `Noélia a réalisé ${(diff * 100).toFixed(1)}% de tâches en plus. Elle prend ${transfer.toFixed(2)} € sur la cagnotte de Noah.`;
+    explanation = `Noélia a ${(diff * 100).toFixed(1)}% d'assiduité en plus. Elle prend ${transfer.toFixed(2)} € sur la cagnotte de Noah.`;
   } else {
-    explanation = "Égalité : chacun conserve l'intégralité de ses récompenses.";
+    explanation = "Égalité parfaite : aucun transfert de cagnotte.";
+  }
+
+  // Affichage du Leader avec photo PNG
+  const leaderPhoto = document.getElementById('leader-photo');
+  const leaderName = document.getElementById('leader-name');
+  const leaderDesc = document.getElementById('leader-desc');
+
+  if (noahPts > noeliaPts) {
+    leaderName.innerText = "Noah mène la danse !";
+    leaderDesc.innerText = `Avance de +${(noahPts - noeliaPts).toFixed(1)} points quotidiens`;
+    if (leaderPhoto) leaderPhoto.src = AVATARS.Noah;
+  } else if (noeliaPts > noahPts) {
+    leaderName.innerText = "Noélia mène la danse !";
+    leaderDesc.innerText = `Avance de +${(noeliaPts - noahPts).toFixed(1)} points quotidiens`;
+    if (leaderPhoto) leaderPhoto.src = AVATARS.Noélia;
+  } else {
+    leaderName.innerText = "Égalité sur le podium !";
+    leaderDesc.innerText = `${noahPts.toFixed(1)} points chacun`;
+    if (leaderPhoto) leaderPhoto.src = "https://api.dicebear.com/7.x/bottts/svg?seed=duel";
   }
 
   const elNoahPts = document.getElementById('d-noah-pts');
