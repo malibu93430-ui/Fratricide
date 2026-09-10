@@ -1,5 +1,6 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbyspoYpEdIUwX2sLWAdB-ZcZlaf105Ga8b1eI_HSbe7HkKZz0pALOlQyvW9xttdJIUbYw/exec";
 
+// Lignes exactes dans le classeur Sheets
 const NOAH_TASKS = [
   { day: 'Lundi', task: 'Mettre la table', row: 3 },
   { day: 'Lundi', task: 'Vider le lave-vaisselle', row: 4 },
@@ -42,58 +43,55 @@ let state = {
   noeliaBonus: 0
 };
 
-// Initialisation sécurisée une fois le DOM chargé
+// Chargement initial et restauration de session
 document.addEventListener('DOMContentLoaded', () => {
-  const savedState = localStorage.getItem('fratricide_state') || sessionStorage.getItem('fratricide_state');
+  const savedState = localStorage.getItem('fratricide_state');
   if (savedState) {
-    try { state = JSON.parse(savedState); } catch (e) { console.error(e); }
+    try { state = JSON.parse(savedState); } catch (e) {}
   }
 
-  const savedUser = localStorage.getItem('fratricide_session') || sessionStorage.getItem('fratricide_session');
+  const savedUser = localStorage.getItem('fratricide_session');
   if (savedUser) {
     try {
       user = JSON.parse(savedUser);
-      launchApp();
-    } catch (e) { console.error(e); }
+      displayApp();
+    } catch (e) {}
   }
 });
 
 function login() {
-  const uInput = document.getElementById('username');
-  const pInput = document.getElementById('password');
-  if (!uInput || !pInput) return;
+  const uEl = document.getElementById('username');
+  const pEl = document.getElementById('password');
+  if (!uEl || !pEl) return;
 
-  const u = uInput.value.trim().toLowerCase();
-  const p = pInput.value.trim();
+  const u = uEl.value.trim().toLowerCase();
+  const p = pEl.value.trim();
 
   if (u === 'admin' && p === 'admin123') user = { role: 'admin', name: 'Admin (Parents)' };
   else if (u === 'noah' && p === 'noah123') user = { role: 'noah', name: 'Noah' };
   else if (u === 'noelia' && p === 'noelia123') user = { role: 'noelia', name: 'Noélia' };
   else {
-    alert('Identifiants invalides');
+    alert('Identifiants incorrects');
     return;
   }
 
-  const serialized = JSON.stringify(user);
-  localStorage.setItem('fratricide_session', serialized);
-  sessionStorage.setItem('fratricide_session', serialized);
-
-  launchApp();
+  localStorage.setItem('fratricide_session', JSON.stringify(user));
+  displayApp();
 }
 
-function launchApp() {
-  const loginEl = document.getElementById('login-screen');
-  const appEl = document.getElementById('app');
-  const userTag = document.getElementById('user-tag');
+function displayApp() {
+  const loginView = document.getElementById('login-screen');
+  const appView = document.getElementById('app');
+  const userDisplay = document.getElementById('user-tag');
 
-  if (loginEl) loginEl.style.display = 'none';
-  if (appEl) appEl.style.display = 'block';
-  if (userTag && user) userTag.innerText = user.name;
+  if (loginView) loginView.style.display = 'none';
+  if (appView) appView.style.display = 'block';
+  if (userDisplay && user) userDisplay.innerText = user.name;
 
-  const bonusSelect = document.getElementById('bonus-assign');
-  if (bonusSelect && user) {
-    if (user.role === 'noah') bonusSelect.value = 'Noah';
-    if (user.role === 'noelia') bonusSelect.value = 'Noélia';
+  const selectEl = document.getElementById('bonus-assign');
+  if (selectEl && user) {
+    if (user.role === 'noah') selectEl.value = 'Noah';
+    if (user.role === 'noelia') selectEl.value = 'Noélia';
   }
 
   setupTabs();
@@ -104,11 +102,10 @@ function launchApp() {
 function logout() {
   user = null;
   localStorage.removeItem('fratricide_session');
-  sessionStorage.removeItem('fratricide_session');
-  const loginEl = document.getElementById('login-screen');
-  const appEl = document.getElementById('app');
-  if (loginEl) loginEl.style.display = 'block';
-  if (appEl) appEl.style.display = 'none';
+  const loginView = document.getElementById('login-screen');
+  const appView = document.getElementById('app');
+  if (loginView) loginView.style.display = 'block';
+  if (appView) appView.style.display = 'none';
 }
 
 function setupTabs() {
@@ -117,28 +114,29 @@ function setupTabs() {
   nav.innerHTML = '';
 
   const tabs = [
-    { id: 'dash', label: '📊 Tableau de bord', access: ['admin', 'noah', 'noelia'] },
-    { id: 'noah', label: '👦 Planning Noah', access: ['admin', 'noah'] },
-    { id: 'noelia', label: '👧 Planning Noélia', access: ['admin', 'noelia'] },
-    { id: 'bonus', label: '⭐ Tâches Bonus (1€)', access: ['admin', 'noah', 'noelia'] }
+    { id: 'dash', label: '📊 Tableau de bord', roles: ['admin', 'noah', 'noelia'] },
+    { id: 'noah', label: '👦 Planning Noah', roles: ['admin', 'noah'] },
+    { id: 'noelia', label: '👧 Planning Noélia', roles: ['admin', 'noelia'] },
+    { id: 'bonus', label: '⭐ Tâches Bonus (1€)', roles: ['admin', 'noah', 'noelia'] }
   ];
 
   tabs.forEach((t, i) => {
-    if (t.access.includes(user.role)) {
-      const b = document.createElement('button');
-      b.className = `nav-tab ${i === 0 ? 'active' : ''}`;
-      b.innerText = t.label;
-      b.onclick = () => showTab(t.id, b);
-      nav.appendChild(b);
+    if (t.roles.includes(user.role)) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `nav-tab ${i === 0 ? 'active' : ''}`;
+      btn.innerText = t.label;
+      btn.onclick = () => switchTab(t.id, btn);
+      nav.appendChild(btn);
     }
   });
 
   if (nav.children.length > 0) {
-    showTab('dash', nav.children[0]);
+    switchTab('dash', nav.children[0]);
   }
 }
 
-function showTab(id, btn) {
+function switchTab(id, btn) {
   document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
 
@@ -148,58 +146,51 @@ function showTab(id, btn) {
   });
 }
 
-function saveLocalState() {
-  const str = JSON.stringify(state);
-  localStorage.setItem('fratricide_state', str);
-  sessionStorage.setItem('fratricide_state', str);
+function persistState() {
+  localStorage.setItem('fratricide_state', JSON.stringify(state));
 }
 
 async function loadDriveData() {
-  const badge = document.getElementById('sync-indicator');
-  if (badge) badge.innerText = 'Chargement Drive...';
+  const sync = document.getElementById('sync-indicator');
+  if (sync) sync.innerText = 'Chargement Drive...';
 
   try {
     const res = await fetch(API_URL);
     const json = await res.json();
 
     if (json && json.status === 'success' && Array.isArray(json.data)) {
+      // Tâches quotidiennes Noah
       NOAH_TASKS.forEach((item, idx) => {
-        const rowData = json.data[item.row - 1];
-        const val = rowData ? rowData[2] : 0;
-        state.noahDaily[idx] = (val == 1 || val == "1") ? 1 : 0;
+        const val = json.data[item.row - 1] ? json.data[item.row - 1][2] : 0;
+        state.noahDaily[idx] = (val == 1 || val === "1") ? 1 : 0;
       });
 
+      // Tâches quotidiennes Noélia
       NOELIA_TASKS.forEach((item, idx) => {
-        const rowData = json.data[item.row - 1];
-        const val = rowData ? rowData[2] : 0;
-        state.noeliaDaily[idx] = (val == 1 || val == "1") ? 1 : 0;
+        const val = json.data[item.row - 1] ? json.data[item.row - 1][2] : 0;
+        state.noeliaDaily[idx] = (val == 1 || val === "1") ? 1 : 0;
       });
 
+      // Lecture bonus : Lignes 36 à 39 (Noah), Lignes 40 à 43 (Noélia)
       let nBonus = 0;
       let noelBonus = 0;
 
-      for (let r = 35; r < Math.min(json.data.length, 45); r++) {
-        if (!json.data[r]) continue;
-        const rowKid = String(json.data[r][0] || "").trim().toLowerCase();
-        const count = Number(json.data[r][2]) || 0;
-
-        if (rowKid === 'noah') {
-          nBonus += count;
-        } else if (rowKid.includes('noel')) {
-          noelBonus += count;
-        }
+      for (let r = 35; r <= 38; r++) {
+        if (json.data[r]) nBonus += Number(json.data[r][2]) || 0;
+      }
+      for (let r = 39; r <= 42; r++) {
+        if (json.data[r]) noelBonus += Number(json.data[r][2]) || 0;
       }
 
       state.noahBonus = nBonus;
       state.noeliaBonus = noelBonus;
 
-      saveLocalState();
-      if (badge) badge.innerText = '🟢 Connecté Drive';
+      persistState();
+      if (sync) sync.innerText = '🟢 Connecté Drive';
       render();
     }
   } catch (e) {
-    console.warn("Synchronisation Drive indisponible, bascule en local :", e);
-    if (badge) badge.innerText = '🟡 Mode Local';
+    if (sync) sync.innerText = '🟡 Mode Local';
     render();
   }
 }
@@ -209,24 +200,24 @@ async function toggleTask(child, idx) {
   const list = child === 'noah' ? state.noahDaily : state.noeliaDaily;
 
   list[idx] = list[idx] === 1 ? 0 : 1;
-  saveLocalState();
+  persistState();
   render();
 
-  const badge = document.getElementById('sync-indicator');
-  if (badge) badge.innerText = 'Enregistrement...';
+  const sync = document.getElementById('sync-indicator');
+  if (sync) sync.innerText = 'Enregistrement...';
 
   try {
     const url = `${API_URL}?action=updateTask&row=${taskList[idx].row}&col=3&value=${list[idx]}`;
     await fetch(url, { mode: 'no-cors' });
-    if (badge) badge.innerText = '🟢 Connecté Drive';
-  } catch (err) {
-    if (badge) badge.innerText = '🟡 Non synchronisé';
+    if (sync) sync.innerText = '🟢 Connecté Drive';
+  } catch (e) {
+    if (sync) sync.innerText = '🟡 Non synchronisé';
   }
 }
 
 async function submitBonus(taskName) {
-  const selectEl = document.getElementById('bonus-assign');
-  let kid = selectEl ? selectEl.value : 'Noah';
+  const select = document.getElementById('bonus-assign');
+  let kid = select ? select.value : 'Noah';
 
   if (user && user.role === 'noah') kid = 'Noah';
   if (user && user.role === 'noelia') kid = 'Noélia';
@@ -234,18 +225,18 @@ async function submitBonus(taskName) {
   if (kid === 'Noah') state.noahBonus += 1;
   else state.noeliaBonus += 1;
 
-  saveLocalState();
+  persistState();
   render();
 
-  const badge = document.getElementById('sync-indicator');
-  if (badge) badge.innerText = 'Enregistrement...';
+  const sync = document.getElementById('sync-indicator');
+  if (sync) sync.innerText = 'Enregistrement...';
 
   try {
     const url = `${API_URL}?action=addBonus&child=${encodeURIComponent(kid)}&task=${encodeURIComponent(taskName)}`;
     await fetch(url, { mode: 'no-cors' });
-    if (badge) badge.innerText = '🟢 Connecté Drive';
-  } catch (err) {
-    if (badge) badge.innerText = '🟡 Non synchronisé';
+    if (sync) sync.innerText = '🟢 Connecté Drive';
+  } catch (e) {
+    if (sync) sync.innerText = '🟡 Non synchronisé';
   }
 }
 
@@ -255,7 +246,7 @@ function render() {
     noahDiv.innerHTML = NOAH_TASKS.map((t, idx) => `
       <div class="task-row">
         <div><strong>${t.day}</strong> : ${t.task}</div>
-        <button class="checkbox-btn ${state.noahDaily[idx] ? 'checked' : ''}" onclick="toggleTask('noah', ${idx})">
+        <button type="button" class="checkbox-btn ${state.noahDaily[idx] ? 'checked' : ''}" onclick="toggleTask('noah', ${idx})">
           ${state.noahDaily[idx] ? '✓' : ''}
         </button>
       </div>
@@ -267,19 +258,20 @@ function render() {
     noeliaDiv.innerHTML = NOELIA_TASKS.map((t, idx) => `
       <div class="task-row">
         <div><strong>${t.day}</strong> : ${t.task}</div>
-        <button class="checkbox-btn ${state.noeliaDaily[idx] ? 'checked' : ''}" onclick="toggleTask('noelia', ${idx})">
+        <button type="button" class="checkbox-btn ${state.noeliaDaily[idx] ? 'checked' : ''}" onclick="toggleTask('noelia', ${idx})">
           ${state.noeliaDaily[idx] ? '✓' : ''}
         </button>
       </div>
     `).join('');
   }
 
+  // Calculs quotidiens et assiduité
   const noahPts = state.noahDaily.filter(v => v === 1).length * 0.5;
   const noeliaPts = state.noeliaDaily.filter(v => v === 1).length * 0.5;
 
-  const maxPossiblePts = 14 * 0.5;
-  const noahPct = maxPossiblePts > 0 ? (noahPts / maxPossiblePts) : 0;
-  const noeliaPct = maxPossiblePts > 0 ? (noeliaPts / maxPossiblePts) : 0;
+  const maxPts = 14 * 0.5;
+  const noahPct = maxPts > 0 ? (noahPts / maxPts) : 0;
+  const noeliaPct = maxPts > 0 ? (noeliaPts / maxPts) : 0;
 
   const diff = Math.abs(noahPct - noeliaPct);
   let noahFinal = state.noahBonus;
