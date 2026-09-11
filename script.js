@@ -1,6 +1,5 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbyspoYpEdIUwX2sLWAdB-ZcZlaf105Ga8b1eI_HSbe7HkKZz0pALOlQyvW9xttdJIUbYw/exec";
 
-// Gestion des fichiers PNG avec encodage de sécurité pour l'accent
 const AVATARS = {
   Noah: "noah.PNG",
   Noélia: encodeURI("noélia.PNG")
@@ -251,31 +250,57 @@ async function submitBonus(taskName) {
   }
 }
 
-// 1. Reset uniquement des tâches quotidiennes
-async function resetDailyCounters() {
-  if (!confirm("⚠️ Réinitialiser toutes les tâches quotidiennes à 0 ?")) return;
+// 1. Bouton Clôturer la semaine (verrouille le vol et remet le quotidien à 0)
+async function closeWeek() {
+  const noahPts = state.noahDaily.filter(v => v === 1).length * 0.5;
+  const noeliaPts = state.noeliaDaily.filter(v => v === 1).length * 0.5;
+  const maxPts = 14 * 0.5;
+  const noahPct = maxPts > 0 ? (noahPts / maxPts) : 0;
+  const noeliaPct = maxPts > 0 ? (noeliaPts / maxPts) : 0;
+  const diff = Math.abs(noahPct - noeliaPct);
 
+  let noahLocked = state.noahBonus;
+  let noeliaLocked = state.noeliaBonus;
+
+  if (noahPct > noeliaPct) {
+    const transfer = state.noeliaBonus * diff;
+    noahLocked += transfer;
+    noeliaLocked = Math.max(0, state.noeliaBonus - transfer);
+  } else if (noeliaPct > noahPct) {
+    const transfer = state.noahBonus * diff;
+    noeliaLocked += transfer;
+    noahLocked = Math.max(0, state.noahBonus - transfer);
+  }
+
+  noahLocked = Number(noahLocked.toFixed(2));
+  noeliaLocked = Number(noeliaLocked.toFixed(2));
+
+  if (!confirm(`⚠️ Clôturer la semaine ?\n\nNouveaux soldes verrouillés :\n• Noah : ${noahLocked.toFixed(2)} €\n• Noélia : ${noeliaLocked.toFixed(2)} €\n\nLe planning quotidien sera remis à zéro pour la nouvelle semaine.`)) return;
+
+  state.noahBonus = noahLocked;
+  state.noeliaBonus = noeliaLocked;
   state.noahDaily = Array(14).fill(0);
   state.noeliaDaily = Array(14).fill(0);
+
   persistState();
   render();
 
   const sync = document.getElementById('sync-indicator');
-  if (sync) sync.innerText = 'Reset Quotidien...';
+  if (sync) sync.innerText = 'Clôture semaine...';
 
   try {
-    const url = `${API_URL}?action=resetDaily`;
+    const url = `${API_URL}?action=closeWeek&noahFinal=${noahLocked}&noeliaFinal=${noeliaLocked}`;
     await fetch(url, { mode: 'no-cors' });
     if (sync) sync.innerText = '🟢 Drive OK';
-    alert("Les tâches quotidiennes sont remises à zéro !");
+    alert("Semaine clôturée avec succès ! Les montants sont verrouillés et le planning est prêt pour lundi.");
   } catch (e) {
     if (sync) sync.innerText = '🟡 Non synchronisé';
   }
 }
 
-// 2. Reset uniquement des bonus
-async function resetBonusCounters() {
-  if (!confirm("⚠️ Réinitialiser toutes les cagnottes bonus à 0 € ?")) return;
+// 2. Bouton Payer les enfants (remet les cagnottes à 0 €)
+async function payKids() {
+  if (!confirm(`💶 Confirmer le paiement des enfants ?\n\nCela remettra les porte-monnaies de Noah et Noélia à 0,00 € dans le système.`)) return;
 
   state.noahBonus = 0;
   state.noeliaBonus = 0;
@@ -283,13 +308,13 @@ async function resetBonusCounters() {
   render();
 
   const sync = document.getElementById('sync-indicator');
-  if (sync) sync.innerText = 'Reset Bonus...';
+  if (sync) sync.innerText = 'Paiement effectué...';
 
   try {
-    const url = `${API_URL}?action=resetBonus`;
+    const url = `${API_URL}?action=payOut`;
     await fetch(url, { mode: 'no-cors' });
     if (sync) sync.innerText = '🟢 Drive OK';
-    alert("Les cagnottes bonus sont remises à zéro !");
+    alert("Porte-monnaies remis à 0,00 € !");
   } catch (e) {
     if (sync) sync.innerText = '🟡 Non synchronisé';
   }
@@ -326,7 +351,6 @@ function render() {
     `).join('');
   }
 
-  // Calculs quotidiens et assiduité
   const noahPts = state.noahDaily.filter(v => v === 1).length * 0.5;
   const noeliaPts = state.noeliaDaily.filter(v => v === 1).length * 0.5;
 
@@ -339,22 +363,20 @@ function render() {
   let noeliaFinal = state.noeliaBonus;
   let explanation = "";
 
-  // Péréquation corrigée
   if (noahPct > noeliaPct) {
     const transfer = state.noeliaBonus * diff;
     noahFinal += transfer;
-    noeliaFinal = Math.max(0, noeliaFinal - transfer);
+    noeliaFinal = Math.max(0, state.noeliaBonus - transfer);
     explanation = `Noah a ${(diff * 100).toFixed(1)}% d'assiduité en plus. Il prend ${transfer.toFixed(2)} € sur la cagnotte de Noélia.`;
   } else if (noeliaPct > noahPct) {
     const transfer = state.noahBonus * diff;
     noeliaFinal += transfer;
-    noahFinal = Math.max(0, noahFinal - transfer);
+    noahFinal = Math.max(0, state.noahBonus - transfer);
     explanation = `Noélia a ${(diff * 100).toFixed(1)}% d'assiduité en plus. Elle prend ${transfer.toFixed(2)} € sur la cagnotte de Noah.`;
   } else {
     explanation = "Égalité parfaite : aucun transfert de cagnotte.";
   }
 
-  // Affichage Leader avec noah.PNG / noélia.PNG
   const leaderPhoto = document.getElementById('leader-photo');
   const leaderName = document.getElementById('leader-name');
   const leaderDesc = document.getElementById('leader-desc');
