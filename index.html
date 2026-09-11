@@ -9,7 +9,7 @@
 </head>
 <body>
 
-  <!-- Écran de connexion -->
+  <!-- Connexion -->
   <div id="login-screen">
     <div class="login-box">
       <h2>⚔️ Fratricide</h2>
@@ -43,13 +43,12 @@
     <nav id="nav-container"></nav>
 
     <main class="container">
-      <!-- Dashboard & Duel -->
+      <!-- Dashboard & Leaderboard -->
       <section id="tab-dash">
-        <!-- Bannière Leader avec photo PNG -->
         <div class="card leader-card" id="leader-card">
           <div class="leader-badge">👑 EN TÊTE DU MOIS</div>
           <div class="leader-content">
-            <img id="leader-photo" class="leader-avatar" src="noah.png" alt="Leader" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=leader'">
+            <img id="leader-photo" class="leader-avatar" src="noah.PNG" alt="Leader" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=leader'">
             <div>
               <h2 id="leader-name">Noah</h2>
               <p id="leader-desc" style="color: var(--text-muted); font-size: 0.9rem;"></p>
@@ -86,11 +85,14 @@
           <p id="diff-text" style="font-size: 0.95rem; margin-top: 4px;"></p>
         </div>
 
-        <!-- Panneau Reset Réservé aux Parents -->
+        <!-- Panneau Reset Parents avec 2 boutons distincts -->
         <div class="card reset-card" id="admin-reset-card" style="display: none;">
           <h4 style="color: #991B1B; margin-bottom: 6px;">⚙️ Contrôle Parent / Administrateur</h4>
-          <p style="color: #7F1D1D; font-size: 0.85rem; margin-bottom: 12px;">Remet les compteurs de points et bonus à 0 pour entamer un nouveau mois.</p>
-          <button type="button" class="btn-reset" onclick="resetAllCounters()">🔄 Réinitialiser les compteurs à zéro</button>
+          <p style="color: #7F1D1D; font-size: 0.85rem; margin-bottom: 14px;">Gestion indépendante des remises à zéro :</p>
+          <div class="reset-buttons-grid">
+            <button type="button" class="btn-reset-sub" onclick="resetDailyCounters()">📅 Reset Tâches Quotidiennes</button>
+            <button type="button" class="btn-reset-sub" onclick="resetBonusCounters()">⭐ Reset Tâches Bonus (€)</button>
+          </div>
         </div>
       </section>
 
@@ -139,10 +141,10 @@
                 <small>+1.00 €</small>
               </div>
             </button>
-            <button type="button" class="btn-bonus" onclick="submitBonus('Balayer les extérieurs')">
+            <button type="button" class="btn-bonus" onclick="submitBonus('Balayer l\'extérieur')">
               <span class="bonus-icon">🧹</span>
               <div>
-                <strong>Balayer extérieurs</strong>
+                <strong>Balayer l'extérieur</strong>
                 <small>+1.00 €</small>
               </div>
             </button>
@@ -156,7 +158,14 @@
             <button type="button" class="btn-bonus" onclick="submitBonus('Nettoyer la baie vitrée')">
               <span class="bonus-icon">🪟</span>
               <div>
-                <strong>Nettoyer baie vitrée</strong>
+                <strong>Nettoyer la baie vitrée</strong>
+                <small>+1.00 €</small>
+              </div>
+            </button>
+            <button type="button" class="btn-bonus" onclick="submitBonus('Préparer un repas')">
+              <span class="bonus-icon">🍳</span>
+              <div>
+                <strong>Préparer un repas</strong>
                 <small>+1.00 €</small>
               </div>
             </button>
