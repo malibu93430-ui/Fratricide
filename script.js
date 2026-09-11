@@ -1,9 +1,9 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbyspoYpEdIUwX2sLWAdB-ZcZlaf105Ga8b1eI_HSbe7HkKZz0pALOlQyvW9xttdJIUbYw/exec";
 
-// Avatars en PNG
+// Gestion des fichiers PNG avec encodage de sécurité pour l'accent
 const AVATARS = {
-  Noah: "noah.png",
-  Noélia: "noelia.png"
+  Noah: "noah.PNG",
+  Noélia: encodeURI("noélia.PNG")
 };
 
 const NOAH_TASKS = [
@@ -98,7 +98,6 @@ function displayApp() {
     if (user.role === 'noelia') selectEl.value = 'Noélia';
   }
 
-  // Affiche le bouton reset seulement pour l'admin
   const resetCard = document.getElementById('admin-reset-card');
   if (resetCard) {
     resetCard.style.display = (user && user.role === 'admin') ? 'block' : 'none';
@@ -252,24 +251,45 @@ async function submitBonus(taskName) {
   }
 }
 
-async function resetAllCounters() {
-  if (!confirm("⚠️ Réinitialiser tous les scores de Noah et Noélia à 0 ?")) return;
+// 1. Reset uniquement des tâches quotidiennes
+async function resetDailyCounters() {
+  if (!confirm("⚠️ Réinitialiser toutes les tâches quotidiennes à 0 ?")) return;
 
   state.noahDaily = Array(14).fill(0);
   state.noeliaDaily = Array(14).fill(0);
+  persistState();
+  render();
+
+  const sync = document.getElementById('sync-indicator');
+  if (sync) sync.innerText = 'Reset Quotidien...';
+
+  try {
+    const url = `${API_URL}?action=resetDaily`;
+    await fetch(url, { mode: 'no-cors' });
+    if (sync) sync.innerText = '🟢 Drive OK';
+    alert("Les tâches quotidiennes sont remises à zéro !");
+  } catch (e) {
+    if (sync) sync.innerText = '🟡 Non synchronisé';
+  }
+}
+
+// 2. Reset uniquement des bonus
+async function resetBonusCounters() {
+  if (!confirm("⚠️ Réinitialiser toutes les cagnottes bonus à 0 € ?")) return;
+
   state.noahBonus = 0;
   state.noeliaBonus = 0;
   persistState();
   render();
 
   const sync = document.getElementById('sync-indicator');
-  if (sync) sync.innerText = 'Reset en cours...';
+  if (sync) sync.innerText = 'Reset Bonus...';
 
   try {
-    const url = `${API_URL}?action=resetAll`;
+    const url = `${API_URL}?action=resetBonus`;
     await fetch(url, { mode: 'no-cors' });
     if (sync) sync.innerText = '🟢 Drive OK';
-    alert("Tous les compteurs sont revenus à zéro !");
+    alert("Les cagnottes bonus sont remises à zéro !");
   } catch (e) {
     if (sync) sync.innerText = '🟡 Non synchronisé';
   }
@@ -306,6 +326,7 @@ function render() {
     `).join('');
   }
 
+  // Calculs quotidiens et assiduité
   const noahPts = state.noahDaily.filter(v => v === 1).length * 0.5;
   const noeliaPts = state.noeliaDaily.filter(v => v === 1).length * 0.5;
 
@@ -318,6 +339,7 @@ function render() {
   let noeliaFinal = state.noeliaBonus;
   let explanation = "";
 
+  // Péréquation corrigée
   if (noahPct > noeliaPct) {
     const transfer = state.noeliaBonus * diff;
     noahFinal += transfer;
@@ -325,14 +347,14 @@ function render() {
     explanation = `Noah a ${(diff * 100).toFixed(1)}% d'assiduité en plus. Il prend ${transfer.toFixed(2)} € sur la cagnotte de Noélia.`;
   } else if (noeliaPct > noahPct) {
     const transfer = state.noahBonus * diff;
-    noahFinal += transfer;
+    noeliaFinal += transfer;
     noahFinal = Math.max(0, noahFinal - transfer);
     explanation = `Noélia a ${(diff * 100).toFixed(1)}% d'assiduité en plus. Elle prend ${transfer.toFixed(2)} € sur la cagnotte de Noah.`;
   } else {
     explanation = "Égalité parfaite : aucun transfert de cagnotte.";
   }
 
-  // Affichage du Leader avec photo PNG
+  // Affichage Leader avec noah.PNG / noélia.PNG
   const leaderPhoto = document.getElementById('leader-photo');
   const leaderName = document.getElementById('leader-name');
   const leaderDesc = document.getElementById('leader-desc');
