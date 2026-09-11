@@ -82,12 +82,20 @@ nav::-webkit-scrollbar { display: none; }
 .final-box { margin-top: 8px; padding: 6px; background: white; border-radius: 8px; font-size: 0.85rem; }
 
 .info-banner { background: #FFFBEB; border: 1px solid #FCD34D; color: #92400E; }
-.reset-card { border: 2px dashed #EF4444; background: #FEF2F2; }
-.reset-buttons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.btn-reset-sub {
-  background: #DC2626; color: white; border: none; padding: 12px 8px;
-  border-radius: 10px; font-weight: 800; font-size: 0.85rem; cursor: pointer; text-align: center;
+
+/* Panneau d'actions Admin */
+.reset-card { border: 2px dashed #DC2626; background: #FEF2F2; }
+.admin-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btn-admin-action {
+  border: none; border-radius: 12px; padding: 12px 8px; color: white; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  font-weight: 800; font-size: 0.9rem; text-align: center;
 }
+.btn-cloture { background: #2563EB; }
+.btn-cloture:active { background: #1D4ED8; }
+.btn-payer { background: #059669; }
+.btn-payer:active { background: #047857; }
+.btn-admin-action small { font-size: 0.72rem; font-weight: 600; opacity: 0.9; }
 
 .section-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .badge-rule { font-size: 0.8rem; background: #EEF2FF; color: var(--primary); padding: 4px 8px; border-radius: 6px; font-weight: 700; }
