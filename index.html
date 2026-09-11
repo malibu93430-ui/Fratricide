@@ -64,7 +64,7 @@
             </div>
             <p>Bonus bruts : <strong id="d-noah-bonus">0.00</strong> €</p>
             <div class="final-box">
-              Gain final net : <strong id="d-noah-final" style="color: var(--noah);">0.00 €</strong>
+              Porte-monnaie net : <strong id="d-noah-final" style="color: var(--noah);">0.00 €</strong>
             </div>
           </div>
 
@@ -75,7 +75,7 @@
             </div>
             <p>Bonus bruts : <strong id="d-noelia-bonus">0.00</strong> €</p>
             <div class="final-box">
-              Gain final net : <strong id="d-noelia-final" style="color: var(--noelia);">0.00 €</strong>
+              Porte-monnaie net : <strong id="d-noelia-final" style="color: var(--noelia);">0.00 €</strong>
             </div>
           </div>
         </div>
@@ -85,13 +85,19 @@
           <p id="diff-text" style="font-size: 0.95rem; margin-top: 4px;"></p>
         </div>
 
-        <!-- Panneau Reset Parents avec 2 boutons distincts -->
+        <!-- Panneau Parent avec Clôture & Paiement -->
         <div class="card reset-card" id="admin-reset-card" style="display: none;">
-          <h4 style="color: #991B1B; margin-bottom: 6px;">⚙️ Contrôle Parent / Administrateur</h4>
-          <p style="color: #7F1D1D; font-size: 0.85rem; margin-bottom: 14px;">Gestion indépendante des remises à zéro :</p>
-          <div class="reset-buttons-grid">
-            <button type="button" class="btn-reset-sub" onclick="resetDailyCounters()">📅 Reset Tâches Quotidiennes</button>
-            <button type="button" class="btn-reset-sub" onclick="resetBonusCounters()">⭐ Reset Tâches Bonus (€)</button>
+          <h4 style="color: #991B1B; margin-bottom: 6px;">⚙️ Gestion Parents</h4>
+          <p style="color: #7F1D1D; font-size: 0.85rem; margin-bottom: 14px;">Clôture hebdomadaire et versement de l'argent de poche :</p>
+          <div class="admin-actions-grid">
+            <button type="button" class="btn-admin-action btn-cloture" onclick="closeWeek()">
+              🔒 Clôturer la semaine
+              <small>Fige le vol et repart à 0 pour le quotidien</small>
+            </button>
+            <button type="button" class="btn-admin-action btn-payer" onclick="payKids()">
+              💶 Payer les enfants
+              <small>Vide le porte-monnaie après paiement</small>
+            </button>
           </div>
         </div>
       </section>
