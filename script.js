@@ -47,6 +47,20 @@ let state = {
   noeliaBonus: 0
 };
 
+// Gestion dynamique des thèmes
+function setTheme(themeName) {
+  document.body.setAttribute('data-theme', themeName);
+  const userKey = user ? `fratricide_theme_${user.role}` : 'fratricide_theme_global';
+  localStorage.setItem(userKey, themeName);
+
+  document.querySelectorAll('.theme-btn').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.getAttribute('onclick').includes(themeName)) {
+      btn.classList.add('active');
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const savedState = localStorage.getItem('fratricide_state');
   if (savedState) {
@@ -59,6 +73,9 @@ document.addEventListener('DOMContentLoaded', () => {
       user = JSON.parse(savedUser);
       displayApp();
     } catch(e) {}
+  } else {
+    const savedTheme = localStorage.getItem('fratricide_theme_global') || 'ios';
+    setTheme(savedTheme);
   }
 });
 
@@ -90,6 +107,11 @@ function displayApp() {
   if (loginView) loginView.style.display = 'none';
   if (appView) appView.style.display = 'block';
   if (userDisplay && user) userDisplay.innerText = user.name;
+
+  // Restaure le thème sauvegardé pour cet utilisateur (défaut : ios pour admin, cyber pour noah, pop pour noelia)
+  const defaultTheme = user.role === 'noah' ? 'cyber' : (user.role === 'noelia' ? 'pop' : 'ios');
+  const userTheme = localStorage.getItem(`fratricide_theme_${user.role}`) || defaultTheme;
+  setTheme(userTheme);
 
   const selectEl = document.getElementById('bonus-assign');
   if (selectEl && user) {
@@ -320,7 +342,6 @@ async function payKids() {
 }
 
 function render() {
-  // Rendu avec les vrais interrupteurs iOS (input checkbox + slider)
   const noahDiv = document.getElementById('noah-tasks');
   if (noahDiv) {
     noahDiv.innerHTML = NOAH_TASKS.map((t, idx) => `
