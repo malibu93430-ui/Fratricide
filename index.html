@@ -43,12 +43,12 @@
     <nav id="nav-container"></nav>
 
     <main class="container">
-      <!-- Dashboard & Leaderboard -->
+      <!-- Dashboard & Duel -->
       <section id="tab-dash">
         <div class="card leader-card" id="leader-card">
           <div class="leader-badge">👑 EN TÊTE DU MOIS</div>
           <div class="leader-content">
-            <img id="leader-photo" class="leader-avatar" src="noah.PNG" alt="Leader" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=leader'">
+            <img id="leader-photo" class="leader-avatar" src="noah.PNG" alt="Leader" onerror="this.onerror=null; this.src='https://api.dicebear.com/7.x/bottts/svg?seed=duel';">
             <div>
               <h2 id="leader-name">Noah</h2>
               <p id="leader-desc" style="color: var(--text-muted); font-size: 0.9rem;"></p>
@@ -85,7 +85,7 @@
           <p id="diff-text" style="font-size: 0.95rem; margin-top: 4px;"></p>
         </div>
 
-        <!-- Panneau Parent avec Clôture & Paiement -->
+        <!-- Panneau d'actions réservé aux Parents -->
         <div class="card reset-card" id="admin-reset-card" style="display: none;">
           <h4 style="color: #991B1B; margin-bottom: 6px;">⚙️ Gestion Parents</h4>
           <p style="color: #7F1D1D; font-size: 0.85rem; margin-bottom: 14px;">Clôture hebdomadaire et versement de l'argent de poche :</p>
