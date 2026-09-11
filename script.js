@@ -1,8 +1,9 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbyspoYpEdIUwX2sLWAdB-ZcZlaf105Ga8b1eI_HSbe7HkKZz0pALOlQyvW9xttdJIUbYw/exec";
 
+// Gestion directe des noms de fichiers images
 const AVATARS = {
   Noah: "noah.PNG",
-  Noélia: encodeURI("noélia.PNG")
+  Noélia: "noélia.PNG"
 };
 
 const NOAH_TASKS = [
@@ -186,7 +187,8 @@ async function loadDriveData() {
         const row = json.data[r];
         if (!row) continue;
         const name = String(row[0] || "").trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const count = Number(row[2]) || 0;
+        const rawCount = parseFloat(row[2]);
+        const count = isNaN(rawCount) ? 0 : rawCount;
 
         if (name === 'noah') nBonus += count;
         else if (name === 'noelia') noelBonus += count;
@@ -250,7 +252,6 @@ async function submitBonus(taskName) {
   }
 }
 
-// 1. Bouton Clôturer la semaine (verrouille le vol et remet le quotidien à 0)
 async function closeWeek() {
   const noahPts = state.noahDaily.filter(v => v === 1).length * 0.5;
   const noeliaPts = state.noeliaDaily.filter(v => v === 1).length * 0.5;
@@ -292,15 +293,14 @@ async function closeWeek() {
     const url = `${API_URL}?action=closeWeek&noahFinal=${noahLocked}&noeliaFinal=${noeliaLocked}`;
     await fetch(url, { mode: 'no-cors' });
     if (sync) sync.innerText = '🟢 Drive OK';
-    alert("Semaine clôturée avec succès ! Les montants sont verrouillés et le planning est prêt pour lundi.");
+    alert("Semaine clôturée avec succès ! Les montants sont verrouillés.");
   } catch (e) {
     if (sync) sync.innerText = '🟡 Non synchronisé';
   }
 }
 
-// 2. Bouton Payer les enfants (remet les cagnottes à 0 €)
 async function payKids() {
-  if (!confirm(`💶 Confirmer le paiement des enfants ?\n\nCela remettra les porte-monnaies de Noah et Noélia à 0,00 € dans le système.`)) return;
+  if (!confirm("💶 Confirmer le paiement des enfants ?\n\nCela remettra les porte-monnaies de Noah et Noélia à 0,00 €.")) return;
 
   state.noahBonus = 0;
   state.noeliaBonus = 0;
@@ -382,16 +382,16 @@ function render() {
   const leaderDesc = document.getElementById('leader-desc');
 
   if (noahPts > noeliaPts) {
-    leaderName.innerText = "Noah mène la danse !";
-    leaderDesc.innerText = `Avance de +${(noahPts - noeliaPts).toFixed(1)} points quotidiens`;
+    if (leaderName) leaderName.innerText = "Noah mène la danse !";
+    if (leaderDesc) leaderDesc.innerText = `Avance de +${(noahPts - noeliaPts).toFixed(1)} points quotidiens`;
     if (leaderPhoto) leaderPhoto.src = AVATARS.Noah;
   } else if (noeliaPts > noahPts) {
-    leaderName.innerText = "Noélia mène la danse !";
-    leaderDesc.innerText = `Avance de +${(noeliaPts - noahPts).toFixed(1)} points quotidiens`;
+    if (leaderName) leaderName.innerText = "Noélia mène la danse !";
+    if (leaderDesc) leaderDesc.innerText = `Avance de +${(noeliaPts - noahPts).toFixed(1)} points quotidiens`;
     if (leaderPhoto) leaderPhoto.src = AVATARS.Noélia;
   } else {
-    leaderName.innerText = "Égalité sur le podium !";
-    leaderDesc.innerText = `${noahPts.toFixed(1)} points chacun`;
+    if (leaderName) leaderName.innerText = "Égalité sur le podium !";
+    if (leaderDesc) leaderDesc.innerText = `${noahPts.toFixed(1)} points chacun`;
     if (leaderPhoto) leaderPhoto.src = "https://api.dicebear.com/7.x/bottts/svg?seed=duel";
   }
 
