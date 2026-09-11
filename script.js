@@ -1,6 +1,5 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbyspoYpEdIUwX2sLWAdB-ZcZlaf105Ga8b1eI_HSbe7HkKZz0pALOlQyvW9xttdJIUbYw/exec";
 
-// Gestion directe des noms de fichiers images
 const AVATARS = {
   Noah: "noah.PNG",
   Noélia: "noélia.PNG"
@@ -276,7 +275,7 @@ async function closeWeek() {
   noahLocked = Number(noahLocked.toFixed(2));
   noeliaLocked = Number(noeliaLocked.toFixed(2));
 
-  if (!confirm(`⚠️ Clôturer la semaine ?\n\nNouveaux soldes verrouillés :\n• Noah : ${noahLocked.toFixed(2)} €\n• Noélia : ${noeliaLocked.toFixed(2)} €\n\nLe planning quotidien sera remis à zéro pour la nouvelle semaine.`)) return;
+  if (!confirm(`⚠️ Clôturer la semaine ?\n\nSoldes verrouillés :\n• Noah : ${noahLocked.toFixed(2)} €\n• Noélia : ${noeliaLocked.toFixed(2)} €\n\nLe planning quotidien sera remis à zéro pour repartir lundi.`)) return;
 
   state.noahBonus = noahLocked;
   state.noeliaBonus = noeliaLocked;
@@ -300,7 +299,7 @@ async function closeWeek() {
 }
 
 async function payKids() {
-  if (!confirm("💶 Confirmer le paiement des enfants ?\n\nCela remettra les porte-monnaies de Noah et Noélia à 0,00 €.")) return;
+  if (!confirm("💶 Confirmer le versement aux enfants ?\n\nCela remettra les porte-monnaies de Noah et Noélia à 0,00 €.")) return;
 
   state.noahBonus = 0;
   state.noeliaBonus = 0;
@@ -321,6 +320,7 @@ async function payKids() {
 }
 
 function render() {
+  // Rendu avec les vrais interrupteurs iOS (input checkbox + slider)
   const noahDiv = document.getElementById('noah-tasks');
   if (noahDiv) {
     noahDiv.innerHTML = NOAH_TASKS.map((t, idx) => `
@@ -329,9 +329,10 @@ function render() {
           <strong>${t.day}</strong>
           <span>${t.task}</span>
         </div>
-        <button type="button" class="checkbox-btn ${state.noahDaily[idx] ? 'checked' : ''}" onclick="toggleTask('noah', ${idx})">
-          ${state.noahDaily[idx] ? '✓' : ''}
-        </button>
+        <label class="switch">
+          <input type="checkbox" ${state.noahDaily[idx] ? 'checked' : ''} onchange="toggleTask('noah', ${idx})">
+          <span class="slider"></span>
+        </label>
       </div>
     `).join('');
   }
@@ -344,9 +345,10 @@ function render() {
           <strong>${t.day}</strong>
           <span>${t.task}</span>
         </div>
-        <button type="button" class="checkbox-btn ${state.noeliaDaily[idx] ? 'checked' : ''}" onclick="toggleTask('noelia', ${idx})">
-          ${state.noeliaDaily[idx] ? '✓' : ''}
-        </button>
+        <label class="switch">
+          <input type="checkbox" ${state.noeliaDaily[idx] ? 'checked' : ''} onchange="toggleTask('noelia', ${idx})">
+          <span class="slider"></span>
+        </label>
       </div>
     `).join('');
   }
