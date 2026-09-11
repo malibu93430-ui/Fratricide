@@ -85,10 +85,10 @@
           <p id="diff-text" style="font-size: 0.95rem; margin-top: 4px;"></p>
         </div>
 
-        <!-- Panneau d'actions réservé aux Parents -->
+        <!-- Panneau d'actions Parent -->
         <div class="card reset-card" id="admin-reset-card" style="display: none;">
           <h4 style="color: #991B1B; margin-bottom: 6px;">⚙️ Gestion Parents</h4>
-          <p style="color: #7F1D1D; font-size: 0.85rem; margin-bottom: 14px;">Clôture hebdomadaire et versement de l'argent de poche :</p>
+          <p style="color: #7F1D1D; font-size: 0.85rem; margin-bottom: 12px;">Clôture hebdomadaire et versement de l'argent de poche :</p>
           <div class="admin-actions-grid">
             <button type="button" class="btn-admin-action btn-cloture" onclick="closeWeek()">
               🔒 Clôturer la semaine
@@ -139,37 +139,37 @@
             </select>
           </div>
 
-          <div class="bonus-buttons">
-            <button type="button" class="btn-bonus" onclick="submitBonus('Faire une lessive')">
-              <span class="bonus-icon">🧺</span>
+          <div class="bonus-grid">
+            <button type="button" class="btn-bonus-card" onclick="submitBonus('Faire une lessive')">
+              <div class="bonus-icon-box">🧺</div>
               <div>
                 <strong>Faire une lessive</strong>
                 <small>+1.00 €</small>
               </div>
             </button>
-            <button type="button" class="btn-bonus" onclick="submitBonus('Balayer l\'extérieur')">
-              <span class="bonus-icon">🧹</span>
+            <button type="button" class="btn-bonus-card" onclick="submitBonus('Balayer les exterieurs')">
+              <div class="bonus-icon-box">🧹</div>
               <div>
-                <strong>Balayer l'extérieur</strong>
+                <strong>Balayer extérieurs</strong>
                 <small>+1.00 €</small>
               </div>
             </button>
-            <button type="button" class="btn-bonus" onclick="submitBonus('Passer l\'aspirateur')">
-              <span class="bonus-icon">✨</span>
+            <button type="button" class="btn-bonus-card" onclick="submitBonus('Passer l aspirateur')">
+              <div class="bonus-icon-box">✨</div>
               <div>
                 <strong>Passer l'aspirateur</strong>
                 <small>+1.00 €</small>
               </div>
             </button>
-            <button type="button" class="btn-bonus" onclick="submitBonus('Nettoyer la baie vitrée')">
-              <span class="bonus-icon">🪟</span>
+            <button type="button" class="btn-bonus-card" onclick="submitBonus('Nettoyer la baie vitree')">
+              <div class="bonus-icon-box">🪟</div>
               <div>
-                <strong>Nettoyer la baie vitrée</strong>
+                <strong>Nettoyer baie vitrée</strong>
                 <small>+1.00 €</small>
               </div>
             </button>
-            <button type="button" class="btn-bonus" onclick="submitBonus('Préparer un repas')">
-              <span class="bonus-icon">🍳</span>
+            <button type="button" class="btn-bonus-card" onclick="submitBonus('Preparer un repas')">
+              <div class="bonus-icon-box">🍳</div>
               <div>
                 <strong>Préparer un repas</strong>
                 <small>+1.00 €</small>
