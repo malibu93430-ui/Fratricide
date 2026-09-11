@@ -7,9 +7,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body data-theme="ios">
 
-  <!-- Connexion -->
+  <!-- Écran de Connexion -->
   <div id="login-screen">
     <div class="login-box">
       <h2>⚔️ Fratricide</h2>
@@ -35,6 +35,12 @@
         <span class="badge-sync" id="sync-indicator">Synchronisé</span>
       </div>
       <div class="header-actions">
+        <!-- Sélecteur de Thème en Direct -->
+        <div class="theme-selector">
+          <button type="button" class="theme-btn" onclick="setTheme('ios')" title="Thème iOS Épuré">🍏</button>
+          <button type="button" class="theme-btn" onclick="setTheme('cyber')" title="Thème Cyber Gaming">🎮</button>
+          <button type="button" class="theme-btn" onclick="setTheme('pop')" title="Thème Néo-Pop">⚡</button>
+        </div>
         <span id="user-tag"></span>
         <button type="button" class="btn-logout" onclick="logout()">Sortir</button>
       </div>
@@ -62,9 +68,9 @@
               <h3>👦 Noah</h3>
               <span class="pill-pts"><strong id="d-noah-pts">0.0</strong> pts</span>
             </div>
-            <p>Bonus bruts : <strong id="d-noah-bonus">0.00</strong> €</p>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Bonus bruts : <strong id="d-noah-bonus">0.00</strong> €</p>
             <div class="final-box">
-              Porte-monnaie net : <strong id="d-noah-final" style="color: var(--noah);">0.00 €</strong>
+              Porte-monnaie net : <strong id="d-noah-final" style="color: var(--noah-accent);">0.00 €</strong>
             </div>
           </div>
 
@@ -73,30 +79,30 @@
               <h3>👧 Noélia</h3>
               <span class="pill-pts"><strong id="d-noelia-pts">0.0</strong> pts</span>
             </div>
-            <p>Bonus bruts : <strong id="d-noelia-bonus">0.00</strong> €</p>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Bonus bruts : <strong id="d-noelia-bonus">0.00</strong> €</p>
             <div class="final-box">
-              Porte-monnaie net : <strong id="d-noelia-final" style="color: var(--noelia);">0.00 €</strong>
+              Porte-monnaie net : <strong id="d-noelia-final" style="color: var(--noelia-accent);">0.00 €</strong>
             </div>
           </div>
         </div>
 
         <div class="card info-banner">
-          <h4>⚖️ Péréquation des cagnottes :</h4>
-          <p id="diff-text" style="font-size: 0.95rem; margin-top: 4px;"></p>
+          <h4 style="margin-bottom: 4px;">⚖️ Péréquation des cagnottes :</h4>
+          <p id="diff-text" style="font-size: 0.9rem;"></p>
         </div>
 
         <!-- Panneau d'actions Parent -->
         <div class="card reset-card" id="admin-reset-card" style="display: none;">
-          <h4 style="color: #991B1B; margin-bottom: 6px;">⚙️ Gestion Parents</h4>
-          <p style="color: #7F1D1D; font-size: 0.85rem; margin-bottom: 12px;">Clôture hebdomadaire et versement de l'argent de poche :</p>
+          <h4 style="color: #DC2626; margin-bottom: 4px;">⚙️ Gestion Parents</h4>
+          <p style="font-size: 0.8rem; margin-bottom: 12px; color: var(--text-muted);">Clôture hebdomadaire et versement de l'argent de poche :</p>
           <div class="admin-actions-grid">
             <button type="button" class="btn-admin-action btn-cloture" onclick="closeWeek()">
               🔒 Clôturer la semaine
-              <small>Fige le vol et repart à 0 pour le quotidien</small>
+              <small>Fige le vol & remet le quotidien à 0</small>
             </button>
             <button type="button" class="btn-admin-action btn-payer" onclick="payKids()">
               💶 Payer les enfants
-              <small>Vide le porte-monnaie après paiement</small>
+              <small>Remet le porte-monnaie à 0 €</small>
             </button>
           </div>
         </div>
