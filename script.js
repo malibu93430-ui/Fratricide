@@ -8,37 +8,35 @@ const AVATARS = {
 const NOAH_TASKS = [
   { day: 'Lundi', task: 'Mettre la table', row: 3 },
   { day: 'Lundi', task: 'Vider le lave-vaisselle', row: 4 },
-  { day: 'Mardi', task: 'Mettre la table', row: 5 },
-  { day: 'Mardi', task: 'Vider le lave-vaisselle', row: 6 },
+  { day: 'Mardi', task: 'Débarrasser la table', row: 5 },
+  { day: 'Mardi', task: 'Remplir le lave-vaisselle', row: 6 },
   { day: 'Mercredi', task: 'Mettre la table', row: 7 },
   { day: 'Mercredi', task: 'Vider le lave-vaisselle', row: 8 },
-  { day: 'Jeudi', task: 'Mettre la table', row: 9 },
-  { day: 'Jeudi', task: 'Vider le lave-vaisselle', row: 10 },
+  { day: 'Jeudi', task: 'Débarrasser la table', row: 9 },
+  { day: 'Jeudi', task: 'Remplir le lave-vaisselle', row: 10 },
   { day: 'Vendredi', task: 'Mettre la table', row: 11 },
   { day: 'Vendredi', task: 'Vider le lave-vaisselle', row: 12 },
-  { day: 'Samedi', task: 'Mettre la table', row: 13 },
-  { day: 'Samedi', task: 'Vider le lave-vaisselle', row: 14 },
+  { day: 'Samedi', task: 'Débarrasser la table', row: 13 },
+  { day: 'Samedi', task: 'Remplir le lave-vaisselle', row: 14 },
   { day: 'Dimanche', task: 'Mettre la table', row: 15 },
   { day: 'Dimanche', task: 'Vider le lave-vaisselle', row: 16 }
 ];
-
 const NOELIA_TASKS = [
-  { day: 'Lundi', task: 'Débarrasser la table', row: 21 },
+ { day: 'Lundi', task: 'Débarrasser la table', row: 21 },
   { day: 'Lundi', task: 'Remplir le lave-vaisselle', row: 22 },
-  { day: 'Mardi', task: 'Débarrasser la table', row: 23 },
-  { day: 'Mardi', task: 'Remplir le lave-vaisselle', row: 24 },
+  { day: 'Mardi', task: 'Mettre la table', row: 23 },
+  { day: 'Mardi', task: 'Vider le lave-vaisselle', row: 24 },
   { day: 'Mercredi', task: 'Débarrasser la table', row: 25 },
   { day: 'Mercredi', task: 'Remplir le lave-vaisselle', row: 26 },
-  { day: 'Jeudi', task: 'Débarrasser la table', row: 27 },
-  { day: 'Jeudi', task: 'Remplir le lave-vaisselle', row: 28 },
+  { day: 'Jeudi', task: 'Mettre la table', row: 27 },
+  { day: 'Jeudi', task: 'Vider le lave-vaisselle', row: 28 },
   { day: 'Vendredi', task: 'Débarrasser la table', row: 29 },
   { day: 'Vendredi', task: 'Remplir le lave-vaisselle', row: 30 },
-  { day: 'Samedi', task: 'Débarrasser la table', row: 31 },
-  { day: 'Samedi', task: 'Remplir le lave-vaisselle', row: 32 },
+  { day: 'Samedi', task: 'Mettre la table', row: 31 },
+  { day: 'Samedi', task: 'Vider le lave-vaisselle', row: 32 },
   { day: 'Dimanche', task: 'Débarrasser la table', row: 33 },
   { day: 'Dimanche', task: 'Remplir le lave-vaisselle', row: 34 }
 ];
-
 let user = null;
 let state = {
   noahDaily: Array(14).fill(0),
