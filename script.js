@@ -86,7 +86,7 @@ function login() {
   const p = pEl.value.trim();
 
   if (u === 'admin' && p === 'admin1902') user = { role: 'admin', name: 'Papa & Maman' };
-  else if (u === 'noah' && p === 'noahn1') user = { role: 'noah', name: 'Noah' };
+  else if (u === 'noah' && p === 'noah0335') user = { role: 'noah', name: 'Noah' };
   else if (u === 'noelia' && p === 'noeliachaise') user = { role: 'noelia', name: 'Noélia' };
   else {
     alert('Identifiants incorrects');
